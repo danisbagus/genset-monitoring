@@ -1,0 +1,194 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────────────
+  # PostgreSQL
+  # ─────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: genset_postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: genset_monitoring
+
+    ports:
+      - "5435:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d genset_monitoring"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # Redis
+  # ─────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: genset_redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    ports:
+      - "6380:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # Mosquitto MQTT
+  # ─────────────────────────────────────────────────────
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: genset_mqtt
+    restart: unless-stopped
+
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+
+    volumes:
+      - ./docker/mosquitto/config:/mosquitto/config
+      - ./docker/mosquitto/data:/mosquitto/data
+      - ./docker/mosquitto/log:/mosquitto/log
+
+    healthcheck:
+      test: ["CMD-SHELL", "pidof mosquitto || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # Adminer (PostgreSQL Dashboard)
+  # ─────────────────────────────────────────────────────
+  adminer:
+    image: adminer
+    container_name: genset_adminer
+    restart: unless-stopped
+
+    ports:
+      - "8082:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # RedisInsight
+  # ─────────────────────────────────────────────────────
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: genset_redisinsight
+    restart: unless-stopped
+
+    ports:
+      - "5540:5540"
+
+    volumes:
+      - redisinsight_data:/data
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # Dozzle (Realtime Logs Dashboard)
+  # ─────────────────────────────────────────────────────
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: genset_dozzle
+    restart: unless-stopped
+
+    ports:
+      - "8083:8080"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    networks:
+      - genset_net
+
+  # ─────────────────────────────────────────────────────
+  # Backend API
+  # ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: genset_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=genset_monitoring
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - JWT_SECRET=genset-monitoring-secret-key-123
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - genset_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  redisinsight_data:
+
+networks:
+  genset_net:
+    driver: bridge
