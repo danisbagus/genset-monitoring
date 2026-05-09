@@ -12,7 +12,8 @@ Production-ready IoT Genset Monitoring backend built with Go.
 | Cache       | Redis 7                       |
 | Messaging   | MQTT (Paho) + Mosquitto       |
 | WebSocket   | Gorilla WebSocket             |
-| Auth        | JWT (golang-jwt/jwt v5)       |
+| Auth        | JWT + Refresh Token Rotation  |
+| Security    | Bcrypt + SHA-256 Hashing      |
 | Logging     | Uber Zap                      |
 | Config      | Viper + godotenv              |
 | Docs        | Swaggo / Swagger UI           |
@@ -25,13 +26,14 @@ Production-ready IoT Genset Monitoring backend built with Go.
 
 - Go 1.22+
 - Docker & Docker Compose
+- `golang-migrate` CLI (`make migrate-install`)
 - `swag` CLI (`go install github.com/swaggo/swag/cmd/swag@latest`)
 
 ### 1. Clone & configure
 
 ```bash
 cp .env.example .env
-# Edit .env with your values
+# Edit .env with your values, especially JWT_SECRET
 ```
 
 ### 2. Start infrastructure
@@ -40,13 +42,31 @@ cp .env.example .env
 make docker-up
 ```
 
-### 3. Run the server
+### 3. Run database migrations
+
+```bash
+make migrate-up
+```
+
+### 4. Run the server
 
 ```bash
 make dev
 ```
 
 Server starts at **http://localhost:8080**
+
+---
+
+## Authentication Flow
+
+This project implements a secure **JWT + Refresh Token Rotation** strategy:
+
+1.  **Login**: User provides credentials. Server returns `access_token` (short-lived) and `refresh_token` (long-lived).
+2.  **Access**: Client uses `access_token` in `Authorization: Bearer <token>` header.
+3.  **Refresh**: When `access_token` expires, client sends `refresh_token` to `/auth/refresh`.
+4.  **Rotation**: Server revokes the old `refresh_token`, issues a **new pair** of tokens. This prevents replay attacks.
+5.  **Security**: Refresh tokens are stored as **SHA-256 hashes** in the database. Raw tokens are never persisted. Passwords use **Bcrypt** (cost 12).
 
 ---
 
@@ -66,23 +86,17 @@ make swagger
 
 ---
 
-## Healthcheck
+## Database Migrations
 
-```
-GET /api/v1/health
-```
+We use `golang-migrate` for versioned database schema management.
 
-```json
-{
-  "success": true,
-  "message": "service healthy",
-  "data": {
-    "postgres": "connected",
-    "redis": "connected",
-    "mqtt": "connected"
-  }
-}
-```
+| Command                  | Description                                      |
+|--------------------------|--------------------------------------------------|
+| `make migrate-up`        | Apply all pending migrations                     |
+| `make migrate-down`      | Roll back the last migration                     |
+| `make migrate-create NAME=x` | Create a new migration file pair              |
+| `make migrate-version`   | Show current schema version                      |
+| `make migrate-install`   | Install the `migrate` CLI tool                   |
 
 ---
 
@@ -106,78 +120,36 @@ GET /api/v1/health
 
 ```
 backend/
-├── cmd/api/main.go              # Entry point, DI wiring, graceful shutdown
-├── docs/                        # Swagger generated docs (swag init)
+├── cmd/api/main.go              # Entry point, DI wiring, routes
+├── migrations/                  # SQL migration files (up/down)
 ├── internal/
-│   ├── config/                  # Viper config loader
-│   ├── handler/                 # HTTP handlers (Gin)
-│   ├── service/                 # Business logic interfaces + implementations
-│   ├── repository/              # Database access layer (GORM)
-│   ├── middleware/              # Gin middlewares (auth, logger, recovery)
-│   ├── websocket/               # Gorilla WebSocket hub
-│   ├── mqtt/                    # MQTT service interface
-│   ├── auth/                    # Auth service interface (placeholder)
-│   ├── model/                   # GORM domain models
-│   └── infrastructure/
-│       ├── database/            # PostgreSQL singleton
-│       ├── redis/               # Redis singleton
-│       ├── mqtt/                # MQTT singleton with auto-reconnect
-│       └── logger/              # Zap logger setup
+│   ├── handler/                 # HTTP handlers (Auth, Health)
+│   ├── service/                 # Business logic (AuthService)
+│   ├── repository/              # Data access (UserRepository, TokenRepository)
+│   ├── model/                   # GORM models (User, RefreshToken)
+│   ├── middleware/              # Auth, Logger, Recovery middlewares
+│   ├── infrastructure/          # DB, Redis, MQTT, Logger drivers
+│   └── config/                  # Configuration loader
 ├── pkg/
-│   ├── response/                # Reusable HTTP response helpers
-│   ├── utils/                   # UUID, time, crypto utilities
-│   └── validator/               # Struct validation wrapper
-├── docker/
-│   └── mosquitto/config/        # Mosquitto MQTT config
-├── scripts/                     # Helper shell scripts
-├── .env.example                 # Environment variable template
-├── docker-compose.yml           # Infrastructure stack
-├── Dockerfile                   # Multi-stage build
-└── Makefile                     # Developer commands
+│   ├── jwtutil/                 # JWT manager (sign/parse)
+│   ├── hashutil/                # Password (bcrypt) & Token (sha256) utils
+│   ├── response/                # Standard JSON response helpers
+│   └── validator/               # Request validation wrapper
+└── scripts/                     # Migration wrapper scripts
 ```
-
----
-
-## Architecture
-
-The project follows **Clean Architecture** principles:
-
-- **Handler** — HTTP request/response, no business logic
-- **Service** — Business logic, implements interfaces
-- **Repository** — Data access, wraps GORM operations
-- **Infrastructure** — External connections (DB, Redis, MQTT)
-- **Model** — Domain entities (GORM models)
-
-Dependencies flow inward: `handler → service → repository → infrastructure`
-
----
-
-## WebSocket
-
-Connect to the WebSocket endpoint:
-
-```
-ws://localhost:8080/ws?client_id=dashboard-1
-```
-
-The server broadcasts telemetry updates to all connected clients via the Hub.
 
 ---
 
 ## Environment Variables
 
-See [`.env.example`](.env.example) for a full reference.
+Key variables in `.env`:
 
-Key variables:
-
-| Variable          | Default               | Description              |
-|-------------------|-----------------------|--------------------------|
-| `APP_PORT`        | `8080`                | HTTP server port         |
-| `APP_ENV`         | `development`         | `development|production` |
-| `DB_HOST`         | `localhost`           | PostgreSQL host          |
-| `REDIS_HOST`      | `localhost`           | Redis host               |
-| `MQTT_BROKER`     | `localhost`           | MQTT broker host         |
-| `JWT_SECRET`      | *(change me)*         | JWT signing secret       |
+| Variable                 | Default       | Description                       |
+|--------------------------|---------------|-----------------------------------|
+| `JWT_SECRET`             | *(required)*  | Secret key for signing tokens     |
+| `JWT_EXPIRATION`         | `1h`          | Access token TTL                  |
+| `JWT_REFRESH_EXPIRATION` | `168h`        | Refresh token TTL (7 days)        |
+| `DB_PORT`                | `5435`        | PostgreSQL port (docker-compose)  |
 
 ---
 

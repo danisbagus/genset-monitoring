@@ -15,7 +15,7 @@
 // @securityDefinitions.apikey  BearerAuth
 // @in                          header
 // @name                        Authorization
-// @description                 Enter the token with the `Bearer: ` prefix, e.g. "Bearer eyJhbGciO..."
+// @description                 Enter the token with the `Bearer ` prefix, e.g. "Bearer eyJhbGciO..."
 
 package main
 
@@ -36,8 +36,11 @@ import (
 	inframqtt "github.com/danisbagus/genset-monitoring/backend/internal/infrastructure/mqtt"
 	infraredis "github.com/danisbagus/genset-monitoring/backend/internal/infrastructure/redis"
 	"github.com/danisbagus/genset-monitoring/backend/internal/middleware"
+	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/internal/service"
 	ws "github.com/danisbagus/genset-monitoring/backend/internal/websocket"
+	"github.com/danisbagus/genset-monitoring/backend/pkg/jwtutil"
+	pkgvalidator "github.com/danisbagus/genset-monitoring/backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -54,7 +57,6 @@ func main() {
 
 	cfg, err := config.Load(envFile)
 	if err != nil {
-		// Logger is not yet initialised, use fmt
 		fmt.Fprintf(os.Stderr, "failed to load config: %v\n", err)
 		os.Exit(1)
 	}
@@ -94,11 +96,23 @@ func main() {
 	// ─── WebSocket Hub ────────────────────────────────────────────────────────
 	wsHub := ws.NewHub(log)
 
+	// ─── JWT Manager ──────────────────────────────────────────────────────────
+	jwtManager := jwtutil.NewManager(cfg.JWT.Secret, cfg.JWT.Expiration)
+
+	// ─── Shared validator ─────────────────────────────────────────────────────
+	v := pkgvalidator.New()
+
+	// ─── Repositories ─────────────────────────────────────────────────────────
+	userRepo := repository.NewUserRepository(db)
+	tokenRepo := repository.NewRefreshTokenRepository(db)
+
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
+	authSvc := service.NewAuthService(userRepo, tokenRepo, jwtManager, cfg.JWT.RefreshExpiration, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
+	authHandler := handler.NewAuthHandler(authSvc, v, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -116,7 +130,24 @@ func main() {
 	// ─── Routes ───────────────────────────────────────────────────────────────
 	api := r.Group("/api/v1")
 	{
+		// Health
 		api.GET("/health", healthHandler.Check)
+
+		// Auth (public)
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", authHandler.Register)
+			auth.POST("/login", authHandler.Login)
+			auth.POST("/refresh", authHandler.RefreshToken)
+			auth.POST("/logout", authHandler.Logout)
+		}
+
+		// Auth (protected — requires valid JWT)
+		authProtected := api.Group("/auth")
+		authProtected.Use(middleware.AuthRequired(jwtManager))
+		{
+			authProtected.GET("/me", authHandler.Me)
+		}
 	}
 
 	// WebSocket endpoint

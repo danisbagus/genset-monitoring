@@ -54,8 +54,9 @@ type MQTTConfig struct {
 }
 
 type JWTConfig struct {
-	Secret     string        `mapstructure:"JWT_SECRET"`
-	Expiration time.Duration `mapstructure:"JWT_EXPIRATION"`
+	Secret            string        `mapstructure:"JWT_SECRET"`
+	Expiration        time.Duration `mapstructure:"JWT_EXPIRATION"`
+	RefreshExpiration time.Duration `mapstructure:"JWT_REFRESH_EXPIRATION"`
 }
 
 // Load reads configuration from environment variables and optional .env file.
@@ -116,8 +117,9 @@ func Load(envFile string) (*Config, error) {
 	}
 
 	cfg.JWT = JWTConfig{
-		Secret:     v.GetString("JWT_SECRET"),
-		Expiration: v.GetDuration("JWT_EXPIRATION"),
+		Secret:            v.GetString("JWT_SECRET"),
+		Expiration:        v.GetDuration("JWT_EXPIRATION"),
+		RefreshExpiration: v.GetDuration("JWT_REFRESH_EXPIRATION"),
 	}
 
 	return cfg, nil
@@ -153,5 +155,6 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("MQTT_PASSWORD", "")
 
 	v.SetDefault("JWT_SECRET", "change-me-in-production")
-	v.SetDefault("JWT_EXPIRATION", "24h")
+	v.SetDefault("JWT_EXPIRATION", "1h")
+	v.SetDefault("JWT_REFRESH_EXPIRATION", "168h") // 7 days
 }

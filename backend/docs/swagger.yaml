@@ -1,0 +1,349 @@
+basePath: /
+definitions:
+  github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole:
+    enum:
+    - admin
+    - operator
+    - viewer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleOperator
+    - RoleViewer
+  github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus:
+    properties:
+      mqtt:
+        type: string
+      postgres:
+        type: string
+      redis:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole'
+      username:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole'
+      username:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse:
+    properties:
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_pkg_response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  internal_handler.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_handler.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  internal_handler.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 128
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - admin
+        - operator
+        - viewer
+        type: string
+      username:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@genset-monitoring.io
+    name: API Support
+  description: Production-ready IoT Genset Monitoring backend API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Genset Monitoring API
+  version: "1.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns access and refresh tokens
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput'
+              type: object
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revokes the provided refresh token (single-device logout)
+      parameters:
+      - description: Refresh token to revoke
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      description: Returns the profile of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current user profile
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Current User
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Rotates a refresh token and returns a new access + refresh token
+        pair
+      parameters:
+      - description: Refresh token payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens refreshed
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput'
+              type: object
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      summary: Refresh Token
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account with the given credentials
+      parameters:
+      - description: Registration payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput'
+              type: object
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "409":
+          description: Username or email already taken
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      summary: Register
+      tags:
+      - auth
+  /api/v1/health:
+    get:
+      description: Returns the health status of the service and its infrastructure
+        dependencies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service healthy
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus'
+              type: object
+        "503":
+          description: Service degraded
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus'
+              type: object
+      summary: Health Check
+      tags:
+      - health
+securityDefinitions:
+  BearerAuth:
+    description: Enter the token with the `Bearer ` prefix, e.g. "Bearer eyJhbGciO..."
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
