@@ -105,14 +105,20 @@ func main() {
 	// ─── Repositories ─────────────────────────────────────────────────────────
 	userRepo := repository.NewUserRepository(db)
 	tokenRepo := repository.NewRefreshTokenRepository(db)
+	deviceRepo := repository.NewDeviceRepository(db)
+	statusRepo := repository.NewDeviceStatusRepository(db)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
 	authSvc := service.NewAuthService(userRepo, tokenRepo, jwtManager, cfg.JWT.RefreshExpiration, log)
+	deviceSvc := service.NewDeviceService(deviceRepo, log)
+	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
 	authHandler := handler.NewAuthHandler(authSvc, v, log)
+	deviceHandler := handler.NewDeviceHandler(deviceSvc, v, log)
+	statusHandler := handler.NewDeviceStatusHandler(statusSvc, v, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -147,6 +153,21 @@ func main() {
 		authProtected.Use(middleware.AuthRequired(jwtManager))
 		{
 			authProtected.GET("/me", authHandler.Me)
+		}
+
+		// Devices (protected — requires valid JWT)
+		devices := api.Group("/devices")
+		devices.Use(middleware.AuthRequired(jwtManager))
+		{
+			devices.GET("", deviceHandler.List)
+			devices.POST("", deviceHandler.Create)
+			devices.GET("/:deviceID", deviceHandler.GetByID)
+			devices.PATCH("/:deviceID", deviceHandler.Update)
+			devices.DELETE("/:deviceID", deviceHandler.Delete)
+
+			// Device Status & Heartbeat
+			devices.GET("/:deviceID/status", statusHandler.GetStatus)
+			devices.POST("/:deviceID/heartbeat", statusHandler.Heartbeat)
 		}
 	}
 

@@ -1,3 +1,5 @@
 backend/.env
 backend/bin
 backend/tmp
+backend/tmp/build-errors.log
+docker/mosquitto/data

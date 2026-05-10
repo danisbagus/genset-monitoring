@@ -10,6 +10,98 @@ definitions:
     - RoleAdmin
     - RoleOperator
     - RoleViewer
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput:
+    properties:
+      device_token:
+        type: string
+      id:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail:
+    properties:
+      created_at:
+        type: string
+      device_code:
+        type: string
+      engine_id:
+        type: string
+      firmware_version:
+        type: string
+      gsm_number:
+        type: string
+      id:
+        type: string
+      is_online:
+        type: boolean
+      last_seen:
+        type: string
+      metadata: {}
+      name:
+        type: string
+      serial_number:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem:
+    properties:
+      created_at:
+        type: string
+      device_code:
+        type: string
+      engine_id:
+        type: string
+      firmware_version:
+        type: string
+      gsm_number:
+        type: string
+      id:
+        type: string
+      is_online:
+        type: boolean
+      last_seen:
+        type: string
+      name:
+        type: string
+      serial_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem'
+        type: array
+      pagination:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput:
+    properties:
+      can_connected:
+        type: boolean
+      device_id:
+        type: string
+      gps_connected:
+        type: boolean
+      gsm_signal:
+        type: integer
+      is_online:
+        type: boolean
+      last_seen:
+        type: string
+      rs485_connected:
+        type: boolean
+      sd_card_ok:
+        type: boolean
+      server_connected:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
   github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus:
     properties:
       mqtt:
@@ -29,6 +121,15 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
     type: object
   github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput:
     properties:
@@ -77,6 +178,52 @@ definitions:
       success:
         type: boolean
     type: object
+  internal_handler.CreateDeviceRequest:
+    properties:
+      device_code:
+        maxLength: 100
+        minLength: 1
+        type: string
+      engine_id:
+        maxLength: 100
+        type: string
+      gsm_number:
+        maxLength: 50
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      serial_number:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - device_code
+    - name
+    - serial_number
+    type: object
+  internal_handler.HeartbeatRequest:
+    properties:
+      can_connected:
+        type: boolean
+      gps_connected:
+        type: boolean
+      gsm_signal:
+        maximum: 0
+        minimum: -120
+        type: integer
+      rs485_connected:
+        type: boolean
+      sd_card_ok:
+        type: boolean
+      server_connected:
+        type: boolean
+      timestamp:
+        type: string
+    required:
+    - gsm_signal
+    type: object
   internal_handler.LoginRequest:
     properties:
       password:
@@ -116,6 +263,28 @@ definitions:
     - email
     - password
     - username
+    type: object
+  internal_handler.UpdateDeviceRequest:
+    properties:
+      engine_id:
+        maxLength: 100
+        type: string
+      firmware_version:
+        maxLength: 50
+        type: string
+      gsm_number:
+        maxLength: 50
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      status:
+        enum:
+        - active
+        - inactive
+        - maintenance
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -312,6 +481,312 @@ paths:
       summary: Register
       tags:
       - auth
+  /api/v1/devices:
+    get:
+      description: Returns a paginated list of devices with optional search, status,
+        and online/offline filter
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: Search by device_code or name
+        in: query
+        name: search
+        type: string
+      - description: 'Filter by status: active | inactive | maintenance'
+        in: query
+        name: status
+        type: string
+      - description: 'Filter by connectivity: true | false'
+        in: query
+        name: online
+        type: string
+      - description: 'Sort column: created_at | name | device_code | last_seen | firmware_version'
+        in: query
+        name: sort_by
+        type: string
+      - description: 'Sort direction: asc | desc (default: desc)'
+        in: query
+        name: sort_dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device list
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Devices
+      tags:
+      - devices
+    post:
+      consumes:
+      - application/json
+      description: Registers a new device; returns its UUID and a one-time device
+        token
+      parameters:
+      - description: Create device payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateDeviceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Device created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "409":
+          description: device_code or serial_number already in use
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Device
+      tags:
+      - devices
+  /api/v1/devices/{deviceID}:
+    delete:
+      description: Soft-deletes a device by UUID, preserving the audit trail
+      parameters:
+      - description: Device UUID
+        in: path
+        name: deviceID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device deleted
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+        "400":
+          description: Invalid UUID
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Device
+      tags:
+      - devices
+    get:
+      description: Returns full detail of a device by its UUID
+      parameters:
+      - description: Device UUID
+        in: path
+        name: deviceID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device detail
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail'
+              type: object
+        "400":
+          description: Invalid UUID
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Device Detail
+      tags:
+      - devices
+    patch:
+      consumes:
+      - application/json
+      description: Partially updates device fields (name, firmware_version, status)
+      parameters:
+      - description: Device UUID
+        in: path
+        name: deviceID
+        required: true
+        type: string
+      - description: Update device payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.UpdateDeviceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device updated
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+        "400":
+          description: Invalid UUID or request body
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Device
+      tags:
+      - devices
+  /api/v1/devices/{deviceID}/heartbeat:
+    post:
+      consumes:
+      - application/json
+      description: Receives health check from device and updates online status
+      parameters:
+      - description: Device UUID
+        in: path
+        name: deviceID
+        required: true
+        type: string
+      - description: Heartbeat payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.HeartbeatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Heartbeat recorded
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+        "400":
+          description: Invalid payload
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      summary: Device Heartbeat
+      tags:
+      - status
+  /api/v1/devices/{deviceID}/status:
+    get:
+      description: Returns real-time hardware health and connectivity status
+      parameters:
+      - description: Device UUID
+        in: path
+        name: deviceID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status retrieved
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput'
+              type: object
+        "404":
+          description: Status not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Device Status
+      tags:
+      - status
   /api/v1/health:
     get:
       description: Returns the health status of the service and its infrastructure
