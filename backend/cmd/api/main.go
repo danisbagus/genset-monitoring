@@ -107,18 +107,21 @@ func main() {
 	tokenRepo := repository.NewRefreshTokenRepository(db)
 	deviceRepo := repository.NewDeviceRepository(db)
 	statusRepo := repository.NewDeviceStatusRepository(db)
+	telemetryRepo := repository.NewTelemetryRepository(db)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
 	authSvc := service.NewAuthService(userRepo, tokenRepo, jwtManager, cfg.JWT.RefreshExpiration, log)
 	deviceSvc := service.NewDeviceService(deviceRepo, log)
 	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, log)
+	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
 	authHandler := handler.NewAuthHandler(authSvc, v, log)
 	deviceHandler := handler.NewDeviceHandler(deviceSvc, v, log)
 	statusHandler := handler.NewDeviceStatusHandler(statusSvc, v, log)
+	telemetryHandler := handler.NewTelemetryHandler(telemetrySvc, v, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -168,11 +171,17 @@ func main() {
 			// Device Status & Heartbeat
 			devices.GET("/:deviceID/status", statusHandler.GetStatus)
 			devices.POST("/:deviceID/heartbeat", statusHandler.Heartbeat)
-		}
-	}
 
-	// WebSocket endpoint
-	r.GET("/ws", wsHub.ServeWS)
+			// Telemetry
+			devices.POST("/:deviceID/engine", telemetryHandler.CreateEngine)
+			devices.GET("/:deviceID/engine/latest", telemetryHandler.GetLatestEngine)
+			devices.POST("/:deviceID/electrical", telemetryHandler.CreateElectrical)
+			devices.GET("/:deviceID/electrical/latest", telemetryHandler.GetLatestElectrical)
+		}
+
+		// WebSocket endpoint
+		api.GET("/ws", wsHub.ServeWS)
+	}
 
 	// ─── HTTP Server ─────────────────────────────────────────────────────────
 	srv := &http.Server{

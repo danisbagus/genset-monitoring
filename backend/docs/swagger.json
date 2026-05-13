@@ -687,6 +687,310 @@
                 }
             }
         },
+        "/api/v1/devices/{deviceID}/electrical": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Registers new electrical telemetry for a specific device",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "telemetry"
+                ],
+                "summary": "Create Electrical Telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Device UUID",
+                        "name": "deviceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Electrical telemetry payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.CreateElectricalTelemetryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Telemetry created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID or request body",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/devices/{deviceID}/electrical/latest": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the most recent electrical telemetry for a specific device",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "telemetry"
+                ],
+                "summary": "Get Latest Electrical Telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Device UUID",
+                        "name": "deviceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Latest telemetry",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Telemetry not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/devices/{deviceID}/engine": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Registers new engine telemetry for a specific device",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "telemetry"
+                ],
+                "summary": "Create Engine Telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Device UUID",
+                        "name": "deviceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Engine telemetry payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.CreateEngineTelemetryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Telemetry created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID or request body",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/devices/{deviceID}/engine/latest": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the most recent engine telemetry for a specific device",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "telemetry"
+                ],
+                "summary": "Get Latest Engine Telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Device UUID",
+                        "name": "deviceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Latest telemetry",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Telemetry not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/devices/{deviceID}/heartbeat": {
             "post": {
                 "description": "Receives health check from device and updates online status",
@@ -1009,6 +1313,172 @@
                 }
             }
         },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput": {
+            "type": "object",
+            "properties": {
+                "charge_alt_volt": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "earth_curr": {
+                    "type": "number"
+                },
+                "frequency": {
+                    "type": "number"
+                },
+                "l1_curr": {
+                    "type": "number"
+                },
+                "l1_l2_volt": {
+                    "type": "number"
+                },
+                "l1_n_volt": {
+                    "type": "number"
+                },
+                "l1_va": {
+                    "type": "number"
+                },
+                "l1_var": {
+                    "type": "number"
+                },
+                "l2_curr": {
+                    "type": "number"
+                },
+                "l2_l3_volt": {
+                    "type": "number"
+                },
+                "l2_n_volt": {
+                    "type": "number"
+                },
+                "l2_va": {
+                    "type": "number"
+                },
+                "l2_var": {
+                    "type": "number"
+                },
+                "l3_curr": {
+                    "type": "number"
+                },
+                "l3_l1_volt": {
+                    "type": "number"
+                },
+                "l3_n_volt": {
+                    "type": "number"
+                },
+                "l3_va": {
+                    "type": "number"
+                },
+                "l3_var": {
+                    "type": "number"
+                },
+                "percent_fp": {
+                    "type": "number"
+                },
+                "percent_fv": {
+                    "type": "number"
+                },
+                "pf_avg": {
+                    "type": "number"
+                },
+                "pf_l1": {
+                    "type": "number"
+                },
+                "pf_l2": {
+                    "type": "number"
+                },
+                "pf_l3": {
+                    "type": "number"
+                },
+                "total_va": {
+                    "type": "number"
+                },
+                "total_var": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput": {
+            "type": "object",
+            "properties": {
+                "avg_fuel_rate": {
+                    "type": "number"
+                },
+                "batt_volt": {
+                    "type": "number"
+                },
+                "coolant_temperature": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desired_operating_speed": {
+                    "type": "integer"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "ecu_temperature": {
+                    "type": "number"
+                },
+                "fuel_level_bottom": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_1": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_2": {
+                    "type": "number"
+                },
+                "fuel_level_top": {
+                    "type": "number"
+                },
+                "fuel_rate": {
+                    "type": "number"
+                },
+                "intake_manifold_pressure": {
+                    "type": "number"
+                },
+                "intake_manifold_temperature": {
+                    "type": "number"
+                },
+                "keyswitch_batt_potential": {
+                    "type": "number"
+                },
+                "oil_filter_out_pressure": {
+                    "type": "number"
+                },
+                "oil_pressure": {
+                    "type": "number"
+                },
+                "rated_power": {
+                    "type": "number"
+                },
+                "rated_speed": {
+                    "type": "integer"
+                },
+                "run_time": {
+                    "type": "integer"
+                },
+                "speed": {
+                    "type": "integer"
+                },
+                "total_fuel": {
+                    "type": "number"
+                },
+                "trip_fuel": {
+                    "type": "number"
+                },
+                "turbo_pressure": {
+                    "type": "number"
+                }
+            }
+        },
         "github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus": {
             "type": "object",
             "properties": {
@@ -1156,6 +1626,160 @@
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 1
+                }
+            }
+        },
+        "internal_handler.CreateElectricalTelemetryRequest": {
+            "type": "object",
+            "properties": {
+                "charge_alt_volt": {
+                    "type": "number"
+                },
+                "earth_curr": {
+                    "type": "number"
+                },
+                "frequency": {
+                    "type": "number"
+                },
+                "l1_curr": {
+                    "type": "number"
+                },
+                "l1_l2_volt": {
+                    "type": "number"
+                },
+                "l1_n_volt": {
+                    "type": "number"
+                },
+                "l1_va": {
+                    "type": "number"
+                },
+                "l1_var": {
+                    "type": "number"
+                },
+                "l2_curr": {
+                    "type": "number"
+                },
+                "l2_l3_volt": {
+                    "type": "number"
+                },
+                "l2_n_volt": {
+                    "type": "number"
+                },
+                "l2_va": {
+                    "type": "number"
+                },
+                "l2_var": {
+                    "type": "number"
+                },
+                "l3_curr": {
+                    "type": "number"
+                },
+                "l3_l1_volt": {
+                    "type": "number"
+                },
+                "l3_n_volt": {
+                    "type": "number"
+                },
+                "l3_va": {
+                    "type": "number"
+                },
+                "l3_var": {
+                    "type": "number"
+                },
+                "percent_fp": {
+                    "type": "number"
+                },
+                "percent_fv": {
+                    "type": "number"
+                },
+                "pf_avg": {
+                    "type": "number"
+                },
+                "pf_l1": {
+                    "type": "number"
+                },
+                "pf_l2": {
+                    "type": "number"
+                },
+                "pf_l3": {
+                    "type": "number"
+                },
+                "total_va": {
+                    "type": "number"
+                },
+                "total_var": {
+                    "type": "number"
+                }
+            }
+        },
+        "internal_handler.CreateEngineTelemetryRequest": {
+            "type": "object",
+            "properties": {
+                "avg_fuel_rate": {
+                    "type": "number"
+                },
+                "batt_volt": {
+                    "type": "number"
+                },
+                "coolant_temperature": {
+                    "type": "number"
+                },
+                "desired_operating_speed": {
+                    "type": "integer"
+                },
+                "ecu_temperature": {
+                    "type": "number"
+                },
+                "fuel_level_bottom": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_1": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_2": {
+                    "type": "number"
+                },
+                "fuel_level_top": {
+                    "type": "number"
+                },
+                "fuel_rate": {
+                    "type": "number"
+                },
+                "intake_manifold_pressure": {
+                    "type": "number"
+                },
+                "intake_manifold_temperature": {
+                    "type": "number"
+                },
+                "keyswitch_batt_potential": {
+                    "type": "number"
+                },
+                "oil_filter_out_pressure": {
+                    "type": "number"
+                },
+                "oil_pressure": {
+                    "type": "number"
+                },
+                "rated_power": {
+                    "type": "number"
+                },
+                "rated_speed": {
+                    "type": "integer"
+                },
+                "run_time": {
+                    "type": "integer"
+                },
+                "speed": {
+                    "type": "integer"
+                },
+                "total_fuel": {
+                    "type": "number"
+                },
+                "trip_fuel": {
+                    "type": "number"
+                },
+                "turbo_pressure": {
+                    "type": "number"
                 }
             }
         },
