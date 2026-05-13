@@ -10,6 +10,7 @@ A comprehensive solution for remote monitoring and management of diesel generato
 - [Components](#components)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Telemetry Simulator](#telemetry-simulator)
 - [Development](#development)
 - [Troubleshooting](#troubleshooting)
 
@@ -264,6 +265,55 @@ Send these commands to the bot to control the genset:
 | `/ats_on` | Enable ATS |
 | `/ats_off` | Disable ATS |
 | `/help` | Show command list |
+
+---
+
+## Telemetry Simulator
+
+For testing the real-time dashboard without physical hardware, use the telemetry simulator. This simulator sends realistic telemetry data to the API every 1 second.
+
+### How to Run
+
+1. Ensure the API server is running.
+2. Open a new terminal in the `backend` directory.
+3. Run simulator (replace `UUID` with the device ID from the database):
+
+```bash
+# Run simulator for 2 devices
+go run cmd/simulator/main.go -devices="550e8400-e29b-41d4-a716-446655440000,660e8400-e29b-41d4-a716-446655440011"
+```
+
+**Flags:**
+- `-devices`: (Required) Comma-separated list of Device UUIDs.
+- `-interval`: Simulation interval (default: `1s`).
+- `-url`: Base URL API (default: `http://localhost:8080/api/v1`).
+- `-token`: JWT token if endpoint is protected (optional for local testing if auth is bypassed).
+
+### Sample Logs
+
+```text
+2026-05-14T03:55:00.000+0700	INFO	Starting telemetry simulator	{"device_count": 2, "interval": "1s", "api_url": "http://localhost:8080/api/v1"}
+2026-05-14T03:55:01.000+0700	DEBUG	Telemetry sent successfully	{"device_id": "550e8400..."}
+2026-05-14T03:55:01.100+0700	DEBUG	Telemetry sent successfully	{"device_id": "660e8400..."}
+```
+
+### Expected WebSocket Events
+
+Clients connected to `/api/v1/ws` will receive messages every second:
+
+```json
+{
+  "event": "engine.telemetry.updated",
+  "timestamp": "2026-05-14T03:55:01Z",
+  "data": {
+    "device_id": "550e8400-...",
+    "speed": 1542,
+    "oil_pressure": 4.52,
+    "coolant_temperature": 80.5,
+    ...
+  }
+}
+```
 
 ---
 
