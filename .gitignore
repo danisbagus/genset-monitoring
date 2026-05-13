@@ -3,3 +3,4 @@ backend/bin
 backend/tmp
 backend/tmp/build-errors.log
 docker/mosquitto/data
+docker/mosquitto/data/mosquitto.db
