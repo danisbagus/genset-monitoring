@@ -11,6 +11,7 @@ import (
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
+	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
 
 // ── DTOs ─────────────────────────────────────────────────────────
@@ -53,17 +54,20 @@ type DeviceStatusService interface {
 type deviceStatusService struct {
 	statusRepo repository.DeviceStatusRepository
 	deviceRepo repository.DeviceRepository
+	wsHub      *websocket.Hub
 	log        *zap.Logger
 }
 
 func NewDeviceStatusService(
 	statusRepo repository.DeviceStatusRepository,
 	deviceRepo repository.DeviceRepository,
+	wsHub *websocket.Hub,
 	log *zap.Logger,
 ) DeviceStatusService {
 	return &deviceStatusService{
 		statusRepo: statusRepo,
 		deviceRepo: deviceRepo,
+		wsHub:      wsHub,
 		log:        log,
 	}
 }
@@ -124,6 +128,34 @@ func (s *deviceStatusService) Heartbeat(ctx context.Context, input HeartbeatInpu
 	if err := s.statusRepo.Upsert(ctx, status); err != nil {
 		return fmt.Errorf("deviceStatusService.Heartbeat: upsert: %w", err)
 	}
+
+	// Broadcast via websocket
+	go func() {
+		output := &DeviceStatusOutput{
+			DeviceID:        status.DeviceID,
+			IsOnline:        status.IsOnline,
+			LastSeen:        status.LastSeen,
+			GSMSignal:       status.GSMSignal,
+			GPSConnected:    status.GPSConnected,
+			ServerConnected: status.ServerConnected,
+			CANConnected:    status.CANConnected,
+			RS485Connected:  status.RS485Connected,
+			SDCardOK:        status.SDCardOK,
+			UpdatedAt:       status.UpdatedAt,
+		}
+
+		msg, err := websocket.NewMessage("device.status.updated", output)
+		if err != nil {
+			s.log.Warn("Failed to marshal device status for websocket",
+				zap.Error(err),
+				zap.String("device_id", input.DeviceID.String()))
+			return
+		}
+
+		s.wsHub.Broadcast(msg)
+		s.log.Info("Device status broadcasted via websocket",
+			zap.String("device_id", input.DeviceID.String()))
+	}()
 
 	s.log.Debug("heartbeat processed", zap.String("device_id", input.DeviceID.String()))
 	return nil

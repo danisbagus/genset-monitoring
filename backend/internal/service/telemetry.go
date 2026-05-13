@@ -11,6 +11,7 @@ import (
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
+	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
 
 // ── DTOs ─────────────────────────────────────────────────────────
@@ -145,13 +146,20 @@ type TelemetryService interface {
 type telemetryService struct {
 	telemetryRepo repository.TelemetryRepository
 	deviceRepo    repository.DeviceRepository
+	wsHub         *websocket.Hub
 	log           *zap.Logger
 }
 
-func NewTelemetryService(telemetryRepo repository.TelemetryRepository, deviceRepo repository.DeviceRepository, log *zap.Logger) TelemetryService {
+func NewTelemetryService(
+	telemetryRepo repository.TelemetryRepository,
+	deviceRepo repository.DeviceRepository,
+	wsHub *websocket.Hub,
+	log *zap.Logger,
+) TelemetryService {
 	return &telemetryService{
 		telemetryRepo: telemetryRepo,
 		deviceRepo:    deviceRepo,
+		wsHub:         wsHub,
 		log:           log,
 	}
 }
@@ -195,7 +203,24 @@ func (s *telemetryService) CreateEngine(ctx context.Context, input CreateEngineT
 		return nil, fmt.Errorf("telemetryService.CreateEngine: %w", err)
 	}
 
-	return engineToOutput(telemetry), nil
+	output := engineToOutput(telemetry)
+
+	// Broadcast via websocket
+	go func() {
+		msg, err := websocket.NewMessage("engine.telemetry.updated", output)
+		if err != nil {
+			s.log.Warn("Failed to marshal engine telemetry for websocket",
+				zap.Error(err),
+				zap.String("device_id", input.DeviceID.String()))
+			return
+		}
+
+		s.wsHub.Broadcast(msg)
+		s.log.Info("Engine telemetry broadcasted via websocket",
+			zap.String("device_id", input.DeviceID.String()))
+	}()
+
+	return output, nil
 }
 
 func (s *telemetryService) GetLatestEngine(ctx context.Context, deviceID uuid.UUID) (*EngineTelemetryOutput, error) {
@@ -253,7 +278,24 @@ func (s *telemetryService) CreateElectrical(ctx context.Context, input CreateEle
 		return nil, fmt.Errorf("telemetryService.CreateElectrical: %w", err)
 	}
 
-	return electricalToOutput(telemetry), nil
+	output := electricalToOutput(telemetry)
+
+	// Broadcast via websocket
+	go func() {
+		msg, err := websocket.NewMessage("electrical.telemetry.updated", output)
+		if err != nil {
+			s.log.Warn("Failed to marshal electrical telemetry for websocket",
+				zap.Error(err),
+				zap.String("device_id", input.DeviceID.String()))
+			return
+		}
+
+		s.wsHub.Broadcast(msg)
+		s.log.Info("Electrical telemetry broadcasted via websocket",
+			zap.String("device_id", input.DeviceID.String()))
+	}()
+
+	return output, nil
 }
 
 func (s *telemetryService) GetLatestElectrical(ctx context.Context, deviceID uuid.UUID) (*ElectricalTelemetryOutput, error) {

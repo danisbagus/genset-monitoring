@@ -1,126 +1,164 @@
 package websocket
 
 import (
-	"net/http"
 	"sync"
+	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	// Allow all origins in development; restrict in production.
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
-
-// Client represents a connected WebSocket client.
+// Client represents a connected websocket client.
 type Client struct {
 	ID   string
+	hub  *Hub
 	conn *websocket.Conn
 	send chan []byte
 }
 
-// Hub manages all active WebSocket clients and message broadcasting.
+// Hub maintains the set of active clients and broadcasts messages to them.
 type Hub struct {
-	mu      sync.RWMutex
-	clients map[string]*Client
-	log     *zap.Logger
+	clients    map[*Client]bool
+	broadcast  chan []byte
+	register   chan *Client
+	unregister chan *Client
+	log        *zap.Logger
+	mu         sync.RWMutex
 }
 
-// NewHub creates a new WebSocket Hub.
+// NewHub creates a new websocket hub.
 func NewHub(log *zap.Logger) *Hub {
-	return &Hub{
-		clients: make(map[string]*Client),
-		log:     log,
+	h := &Hub{
+		broadcast:  make(chan []byte),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		clients:    make(map[*Client]bool),
+		log:        log,
 	}
+	go h.run()
+	return h
 }
 
-// ServeWS handles WebSocket upgrade and client lifecycle.
-func (h *Hub) ServeWS(c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		h.log.Error("websocket upgrade failed", zap.Error(err))
-		return
-	}
-
-	clientID := c.Query("client_id")
-	if clientID == "" {
-		clientID = c.ClientIP()
-	}
-
-	client := &Client{
-		ID:   clientID,
-		conn: conn,
-		send: make(chan []byte, 256),
-	}
-
-	h.register(client)
-	h.log.Info("websocket client connected", zap.String("client_id", clientID))
-
-	go h.writePump(client)
-	h.readPump(client)
-}
-
-// Broadcast sends a message to all connected clients.
-func (h *Hub) Broadcast(msg []byte) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-
-	for _, client := range h.clients {
+// run handles client registration, unregistration and broadcasting.
+func (h *Hub) run() {
+	for {
 		select {
-		case client.send <- msg:
-		default:
-			h.log.Warn("websocket send buffer full, dropping message",
-				zap.String("client_id", client.ID))
+		case client := <-h.register:
+			h.mu.Lock()
+			h.clients[client] = true
+			h.mu.Unlock()
+
+		case client := <-h.unregister:
+			h.mu.Lock()
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+			}
+			h.mu.Unlock()
+
+		case message := <-h.broadcast:
+			h.mu.RLock()
+			for client := range h.clients {
+				select {
+				case client.send <- message:
+				default:
+					h.log.Warn("Websocket send buffer full, dropping message",
+						zap.String("client_id", client.ID))
+					h.unregisterClient(client)
+				}
+			}
+			h.mu.RUnlock()
 		}
 	}
 }
 
-func (h *Hub) register(c *Client) {
-	h.mu.Lock()
-	h.clients[c.ID] = c
-	h.mu.Unlock()
+// Broadcast sends a message to all connected clients.
+func (h *Hub) Broadcast(msg []byte) {
+	h.broadcast <- msg
 }
 
-func (h *Hub) unregister(c *Client) {
-	h.mu.Lock()
-	if _, ok := h.clients[c.ID]; ok {
-		delete(h.clients, c.ID)
-		close(c.send)
-	}
-	h.mu.Unlock()
+func (h *Hub) unregisterClient(c *Client) {
+	h.unregister <- c
 }
 
-func (h *Hub) readPump(c *Client) {
+// readPump pumps messages from the websocket connection to the hub.
+func (c *Client) readPump() {
 	defer func() {
-		h.unregister(c)
+		c.hub.unregister <- c
 		c.conn.Close()
-		h.log.Info("websocket client disconnected", zap.String("client_id", c.ID))
+		c.hub.log.Info("Websocket client disconnected", zap.String("client_id", c.ID))
 	}()
+
+	c.conn.SetReadLimit(maxMessageSize)
+	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error {
+		_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
 
 	for {
 		_, _, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				h.log.Warn("websocket unexpected close", zap.Error(err))
+				c.hub.log.Warn("Websocket unexpected close",
+					zap.String("client_id", c.ID),
+					zap.Error(err))
 			}
 			break
 		}
+		// We don't expect messages from clients for now (read-only telemetry dashboard)
 	}
 }
 
-func (h *Hub) writePump(c *Client) {
-	defer c.conn.Close()
+// writePump pumps messages from the hub to the websocket connection.
+func (c *Client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.conn.Close()
+	}()
 
-	for msg := range c.send {
-		if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
-			h.log.Warn("websocket write error",
-				zap.String("client_id", c.ID),
-				zap.Error(err))
-			return
+	for {
+		select {
+		case message, ok := <-c.send:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				_ = c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				c.hub.log.Error("Websocket get writer failed",
+					zap.String("client_id", c.ID),
+					zap.Error(err))
+				return
+			}
+			_, _ = w.Write(message)
+
+			// Add queued messages to the current websocket message.
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				_, _ = w.Write([]byte{'\n'})
+				_, _ = w.Write(<-c.send)
+			}
+
+			if err := w.Close(); err != nil {
+				c.hub.log.Warn("Websocket writer close failed",
+					zap.String("client_id", c.ID),
+					zap.Error(err))
+				return
+			}
+
+		case <-ticker.C:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				c.hub.log.Warn("Websocket ping failed",
+					zap.String("client_id", c.ID),
+					zap.Error(err))
+				return
+			}
 		}
 	}
 }
