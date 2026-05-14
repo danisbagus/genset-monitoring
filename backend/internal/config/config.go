@@ -15,6 +15,7 @@ type Config struct {
 	Redis    RedisConfig
 	MQTT     MQTTConfig
 	JWT      JWTConfig
+	CORS     CORSConfig
 }
 
 type AppConfig struct {
@@ -57,6 +58,10 @@ type JWTConfig struct {
 	Secret            string        `mapstructure:"JWT_SECRET"`
 	Expiration        time.Duration `mapstructure:"JWT_EXPIRATION"`
 	RefreshExpiration time.Duration `mapstructure:"JWT_REFRESH_EXPIRATION"`
+}
+
+type CORSConfig struct {
+	AllowedOrigins []string `mapstructure:"CORS_ALLOWED_ORIGINS"`
 }
 
 // Load reads configuration from environment variables and optional .env file.
@@ -122,6 +127,10 @@ func Load(envFile string) (*Config, error) {
 		RefreshExpiration: v.GetDuration("JWT_REFRESH_EXPIRATION"),
 	}
 
+	cfg.CORS = CORSConfig{
+		AllowedOrigins: v.GetStringSlice("CORS_ALLOWED_ORIGINS"),
+	}
+
 	return cfg, nil
 }
 
@@ -157,4 +166,6 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("JWT_SECRET", "change-me-in-production")
 	v.SetDefault("JWT_EXPIRATION", "1h")
 	v.SetDefault("JWT_REFRESH_EXPIRATION", "168h") // 7 days
+
+	v.SetDefault("CORS_ALLOWED_ORIGINS", []string{"http://localhost:5173"})
 }

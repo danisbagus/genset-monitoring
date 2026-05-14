@@ -131,6 +131,7 @@ func main() {
 	r := gin.New()
 	r.Use(middleware.Recovery(log))
 	r.Use(middleware.RequestLogger(log))
+	r.Use(middleware.CORS(cfg.CORS))
 
 	// ─── Swagger ──────────────────────────────────────────────────────────────
 	docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%s", cfg.App.Port)
