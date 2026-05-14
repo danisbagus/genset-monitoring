@@ -1,11 +1,22 @@
 import { ref, onUnmounted } from 'vue'
+import { API_CONFIG } from '@/config/api.config'
 
 export function useWebsocket(url?: string) {
   const socket = ref<WebSocket | null>(null)
   const isConnected = ref(false)
   const error = ref<Event | null>(null)
   
-  const wsUrl = url || import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080/ws'
+  // Construct WS URL: works with relative paths by using current host/protocol
+  const getWsUrl = () => {
+    if (url) return url
+    if (API_CONFIG.WS_URL.startsWith('ws')) return API_CONFIG.WS_URL
+    
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const host = window.location.host
+    return `${protocol}//${host}${API_CONFIG.WS_URL}`
+  }
+
+  const wsUrl = getWsUrl()
   let reconnectTimer: number | null = null
   const reconnectInterval = 5000
 

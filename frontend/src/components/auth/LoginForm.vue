@@ -1,27 +1,29 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 
-const email = ref('');
+const router = useRouter();
+const route = useRoute();
+const { login, isLoading } = useAuth();
+
+const username = ref('');
 const password = ref('');
 const rememberMe = ref(false);
-const isLoading = ref(false);
 const errors = reactive({
-  email: '',
+  username: '',
   password: '',
   general: ''
 });
 
 const validate = () => {
   let isValid = true;
-  errors.email = '';
+  errors.username = '';
   errors.password = '';
   errors.general = '';
 
-  if (!email.value) {
-    errors.email = 'Email is required';
-    isValid = false;
-  } else if (!/\S+@\S+\.\S+/.test(email.value)) {
-    errors.email = 'Email is invalid';
+  if (!username.value) {
+    errors.username = 'Username is required';
     isValid = false;
   }
 
@@ -39,24 +41,16 @@ const validate = () => {
 const handleSubmit = async () => {
   if (!validate()) return;
 
-  isLoading.value = true;
-  
-  // Mock API call
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log('Login attempt:', { email: email.value, rememberMe: rememberMe.value });
-    
-    // For demo purposes, if email is 'error@example.com', show error
-    if (email.value === 'error@example.com') {
-      throw new Error('Invalid credentials');
-    }
-    
-    // Simulate successful login - would redirect or update store here
-    alert('Login successful (Mock)');
-  } catch (err: any) {
-    errors.general = err.message || 'Authentication failed. Please try again.';
-  } finally {
-    isLoading.value = false;
+  const result = await login({
+    username: username.value,
+    password: password.value
+  });
+
+  if (result.success) {
+    const redirectPath = (route.query.redirect as string) || '/';
+    router.push(redirectPath);
+  } else {
+    errors.general = result.message;
   }
 };
 </script>
@@ -71,32 +65,33 @@ const handleSubmit = async () => {
       {{ errors.general }}
     </div>
 
-    <!-- Email Field -->
+    <!-- Username Field -->
     <div class="space-y-1.5">
-      <label for="email" class="block text-xs font-bold uppercase tracking-widest text-slate-400">
-        Work Email
+      <label for="username" class="block text-xs font-bold uppercase tracking-widest text-slate-400">
+        Username
       </label>
       <div class="relative group">
         <input 
-          id="email"
-          v-model="email"
-          type="email"
-          placeholder="name@company.com"
+          id="username"
+          v-model="username"
+          type="text"
+          placeholder="admin_genset"
           :disabled="isLoading"
           class="w-full bg-slate-900 border px-4 py-3 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-all"
           :class="[
-            errors.email 
+            errors.username 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' 
               : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
           ]"
         />
         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
           <svg viewBox="0 0 24 24" class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
       </div>
-      <p v-if="errors.email" class="text-red-500 text-[11px] font-medium mt-1">{{ errors.email }}</p>
+      <p v-if="errors.username" class="text-red-500 text-[11px] font-medium mt-1">{{ errors.username }}</p>
     </div>
 
     <!-- Password Field -->
