@@ -146,6 +146,7 @@ type TelemetryService interface {
 type telemetryService struct {
 	telemetryRepo repository.TelemetryRepository
 	deviceRepo    repository.DeviceRepository
+	statusRepo    repository.DeviceStatusRepository
 	wsHub         *websocket.Hub
 	log           *zap.Logger
 }
@@ -153,12 +154,14 @@ type telemetryService struct {
 func NewTelemetryService(
 	telemetryRepo repository.TelemetryRepository,
 	deviceRepo repository.DeviceRepository,
+	statusRepo repository.DeviceStatusRepository,
 	wsHub *websocket.Hub,
 	log *zap.Logger,
 ) TelemetryService {
 	return &telemetryService{
 		telemetryRepo: telemetryRepo,
 		deviceRepo:    deviceRepo,
+		statusRepo:    statusRepo,
 		wsHub:         wsHub,
 		log:           log,
 	}
@@ -188,19 +191,33 @@ func (s *telemetryService) CreateEngine(ctx context.Context, input CreateEngineT
 		AvgFuelRate:               input.AvgFuelRate,
 		IntakeManifoldPressure:    input.IntakeManifoldPressure,
 		IntakeManifoldTemperature: input.IntakeManifoldTemperature,
-		KeyswitchBattPotential:   input.KeyswitchBattPotential,
+		KeyswitchBattPotential:    input.KeyswitchBattPotential,
 		BattVolt:                  input.BattVolt,
 		EcuTemperature:            input.EcuTemperature,
-		RunTime:                  input.RunTime,
+		RunTime:                   input.RunTime,
 		FuelLevelTop:              input.FuelLevelTop,
 		FuelLevelBottom:           input.FuelLevelBottom,
-		FuelLevelPressure1:       input.FuelLevelPressure1,
-		FuelLevelPressure2:       input.FuelLevelPressure2,
+		FuelLevelPressure1:        input.FuelLevelPressure1,
+		FuelLevelPressure2:        input.FuelLevelPressure2,
 		TurboPressure:             input.TurboPressure,
 	}
 
 	if err := s.telemetryRepo.CreateEngine(ctx, telemetry); err != nil {
 		return nil, fmt.Errorf("telemetryService.CreateEngine: %w", err)
+	}
+
+	// Update latest state (realtime snapshot)
+	err := s.statusRepo.UpsertLatestState(ctx, &model.DeviceLatestState{
+		DeviceID:           input.DeviceID,
+		Speed:              input.Speed,
+		CoolantTemperature: input.CoolantTemperature,
+		OilPressure:        input.OilPressure,
+		FuelLevel:          input.FuelLevelTop, // Using FuelLevelTop as fuel_level for simplicity
+	})
+	if err != nil {
+		s.log.Error("Failed to update device latest state from engine telemetry",
+			zap.Error(err),
+			zap.String("device_id", input.DeviceID.String()))
 	}
 
 	output := engineToOutput(telemetry)
@@ -278,6 +295,19 @@ func (s *telemetryService) CreateElectrical(ctx context.Context, input CreateEle
 		return nil, fmt.Errorf("telemetryService.CreateElectrical: %w", err)
 	}
 
+	// Update latest state (realtime snapshot)
+	err := s.statusRepo.UpsertLatestState(ctx, &model.DeviceLatestState{
+		DeviceID:  input.DeviceID,
+		Frequency: input.Frequency,
+		TotalVa:   input.TotalVa,
+		PfAvg:     input.PfAvg,
+	})
+	if err != nil {
+		s.log.Error("Failed to update device latest state from electrical telemetry",
+			zap.Error(err),
+			zap.String("device_id", input.DeviceID.String()))
+	}
+
 	output := electricalToOutput(telemetry)
 
 	// Broadcast via websocket
@@ -328,14 +358,14 @@ func engineToOutput(m *model.EngineTelemetry) *EngineTelemetryOutput {
 		AvgFuelRate:               m.AvgFuelRate,
 		IntakeManifoldPressure:    m.IntakeManifoldPressure,
 		IntakeManifoldTemperature: m.IntakeManifoldTemperature,
-		KeyswitchBattPotential:   m.KeyswitchBattPotential,
+		KeyswitchBattPotential:    m.KeyswitchBattPotential,
 		BattVolt:                  m.BattVolt,
 		EcuTemperature:            m.EcuTemperature,
-		RunTime:                  m.RunTime,
+		RunTime:                   m.RunTime,
 		FuelLevelTop:              m.FuelLevelTop,
 		FuelLevelBottom:           m.FuelLevelBottom,
-		FuelLevelPressure1:       m.FuelLevelPressure1,
-		FuelLevelPressure2:       m.FuelLevelPressure2,
+		FuelLevelPressure1:        m.FuelLevelPressure1,
+		FuelLevelPressure2:        m.FuelLevelPressure2,
 		TurboPressure:             m.TurboPressure,
 		CreatedAt:                 m.CreatedAt,
 	}

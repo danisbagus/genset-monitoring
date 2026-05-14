@@ -1,8 +1,5 @@
 package model
 
-import (
-	"time"
-)
 
 // DeviceLifecycle represents the lifecycle status of a device.
 type DeviceLifecycle string
@@ -31,9 +28,6 @@ type Device struct {
 	// Firmware
 	FirmwareVersion string `gorm:"column:firmware_version" json:"firmware_version"`
 
-	// Connectivity
-	IsOnline bool       `gorm:"column:is_online;default:false" json:"is_online"`
-	LastSeen *time.Time `gorm:"column:last_seen"               json:"last_seen"`
 
 	// Lifecycle
 	Status DeviceLifecycle `gorm:"column:status;type:device_status;default:active" json:"status"`

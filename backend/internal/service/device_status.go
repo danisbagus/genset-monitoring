@@ -19,7 +19,6 @@ import (
 // DeviceStatusOutput is the public representation of a device's status.
 type DeviceStatusOutput struct {
 	DeviceID        uuid.UUID `json:"device_id"`
-	IsOnline        bool      `json:"is_online"`
 	LastSeen        time.Time `json:"last_seen"`
 	GSMSignal       int16     `json:"gsm_signal"`
 	GPSConnected    bool      `json:"gps_connected"`
@@ -39,7 +38,6 @@ type HeartbeatInput struct {
 	CANConnected    bool
 	RS485Connected  bool
 	SDCardOK        bool
-	Timestamp       time.Time
 }
 
 // ── Interface ─────────────────────────────────────────────────────
@@ -83,7 +81,6 @@ func (s *deviceStatusService) GetStatus(ctx context.Context, deviceID uuid.UUID)
 
 	return &DeviceStatusOutput{
 		DeviceID:        status.DeviceID,
-		IsOnline:        status.IsOnline,
 		LastSeen:        status.LastSeen,
 		GSMSignal:       status.GSMSignal,
 		GPSConnected:    status.GPSConnected,
@@ -106,14 +103,10 @@ func (s *deviceStatusService) Heartbeat(ctx context.Context, input HeartbeatInpu
 
 	// 2. Prepare status update
 	now := time.Now().UTC()
-	lastSeen := input.Timestamp
-	if lastSeen.IsZero() {
-		lastSeen = now
-	}
+	lastSeen := now
 
 	status := &model.DeviceStatus{
 		DeviceID:        input.DeviceID,
-		IsOnline:        true, // heartbeat received means online
 		LastSeen:        lastSeen,
 		GSMSignal:       input.GSMSignal,
 		GPSConnected:    input.GPSConnected,
@@ -129,11 +122,21 @@ func (s *deviceStatusService) Heartbeat(ctx context.Context, input HeartbeatInpu
 		return fmt.Errorf("deviceStatusService.Heartbeat: upsert: %w", err)
 	}
 
+	// 4. Update latest state (realtime snapshot)
+	err := s.statusRepo.UpsertLatestState(ctx, &model.DeviceLatestState{
+		DeviceID:     input.DeviceID,
+		LastOnlineAt: &now,
+	})
+	if err != nil {
+		s.log.Error("Failed to update device latest state from heartbeat",
+			zap.Error(err),
+			zap.String("device_id", input.DeviceID.String()))
+	}
+
 	// Broadcast via websocket
 	go func() {
 		output := &DeviceStatusOutput{
 			DeviceID:        status.DeviceID,
-			IsOnline:        status.IsOnline,
 			LastSeen:        status.LastSeen,
 			GSMSignal:       status.GSMSignal,
 			GPSConnected:    status.GPSConnected,

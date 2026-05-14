@@ -25,8 +25,6 @@ type DeviceListItem struct {
 	SerialNumber    string     `json:"serial_number"`
 	EngineID        string     `json:"engine_id"`
 	GSMNumber       string     `json:"gsm_number"`
-	IsOnline        bool       `json:"is_online"`
-	LastSeen        *time.Time `json:"last_seen"`
 	FirmwareVersion string     `json:"firmware_version"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
@@ -41,8 +39,6 @@ type DeviceDetail struct {
 	EngineID        string       `json:"engine_id"`
 	GSMNumber       string       `json:"gsm_number"`
 	FirmwareVersion string       `json:"firmware_version"`
-	IsOnline        bool         `json:"is_online"`
-	LastSeen        *time.Time   `json:"last_seen"`
 	Status          string       `json:"status"`
 	Metadata        interface{}  `json:"metadata,omitempty"`
 	CreatedAt       time.Time    `json:"created_at"`
@@ -75,7 +71,6 @@ type PaginationMeta struct {
 type DeviceListInput struct {
 	Search  string
 	Status  string
-	Online  *bool  // nil = all, true = online, false = offline
 	Page    int
 	Limit   int
 	SortBy  string
@@ -143,7 +138,6 @@ func (s *deviceService) List(ctx context.Context, input DeviceListInput) (*Devic
 		"updated_at":       true,
 		"name":             true,
 		"device_code":      true,
-		"last_seen":        true,
 		"firmware_version": true,
 	}
 	sortBy := "created_at"
@@ -153,7 +147,6 @@ func (s *deviceService) List(ctx context.Context, input DeviceListInput) (*Devic
 
 	result, err := s.deviceRepo.FindAll(ctx, repository.DeviceFilter{
 		Search:   input.Search,
-		IsOnline: input.Online,
 		Status:   input.Status,
 		Page:     input.Page,
 		Limit:    input.Limit,
@@ -173,8 +166,6 @@ func (s *deviceService) List(ctx context.Context, input DeviceListInput) (*Devic
 			SerialNumber:    d.SerialNumber,
 			EngineID:        d.EngineID,
 			GSMNumber:       d.GSMNumber,
-			IsOnline:        d.IsOnline,
-			LastSeen:        d.LastSeen,
 			FirmwareVersion: d.FirmwareVersion,
 			CreatedAt:       d.CreatedAt,
 			UpdatedAt:       d.UpdatedAt,
@@ -329,8 +320,6 @@ func deviceToDetail(d *model.Device) *DeviceDetail {
 		EngineID:        d.EngineID,
 		GSMNumber:       d.GSMNumber,
 		FirmwareVersion: d.FirmwareVersion,
-		IsOnline:        d.IsOnline,
-		LastSeen:        d.LastSeen,
 		Status:          string(d.Status),
 		CreatedAt:       d.CreatedAt,
 		UpdatedAt:       d.UpdatedAt,

@@ -112,7 +112,6 @@ func (h *DeviceStatusHandler) Heartbeat(c *gin.Context) {
 		CANConnected:    req.CANConnected,
 		RS485Connected:  req.RS485Connected,
 		SDCardOK:        req.SDCardOK,
-		Timestamp:       req.Timestamp,
 	})
 
 	if err != nil {

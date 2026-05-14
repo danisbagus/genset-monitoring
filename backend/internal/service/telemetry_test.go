@@ -9,13 +9,14 @@ import (
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
+	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
 
 type mockTelemetryRepo struct {
 	repository.TelemetryRepository
-	createEngineFunc      func(ctx context.Context, telemetry *model.EngineTelemetry) error
-	getLatestEngineFunc   func(ctx context.Context, deviceID uuid.UUID) (*model.EngineTelemetry, error)
-	createElectricalFunc  func(ctx context.Context, telemetry *model.ElectricalTelemetry) error
+	createEngineFunc        func(ctx context.Context, telemetry *model.EngineTelemetry) error
+	getLatestEngineFunc     func(ctx context.Context, deviceID uuid.UUID) (*model.EngineTelemetry, error)
+	createElectricalFunc    func(ctx context.Context, telemetry *model.ElectricalTelemetry) error
 	getLatestElectricalFunc func(ctx context.Context, deviceID uuid.UUID) (*model.ElectricalTelemetry, error)
 }
 
@@ -44,6 +45,15 @@ func (m *mockDeviceRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Dev
 	return m.findByIDFunc(ctx, id)
 }
 
+type mockStatusRepo struct {
+	repository.DeviceStatusRepository
+	upsertLatestStateFunc func(ctx context.Context, state *model.DeviceLatestState) error
+}
+
+func (m *mockStatusRepo) UpsertLatestState(ctx context.Context, state *model.DeviceLatestState) error {
+	return m.upsertLatestStateFunc(ctx, state)
+}
+
 func TestTelemetryService_CreateEngine_Success(t *testing.T) {
 	deviceID := uuid.New()
 	mockT := &mockTelemetryRepo{
@@ -56,7 +66,12 @@ func TestTelemetryService_CreateEngine_Success(t *testing.T) {
 			return &model.Device{Base: model.Base{ID: deviceID}}, nil
 		},
 	}
-	svc := NewTelemetryService(mockT, mockD, zap.NewNop())
+	mockS := &mockStatusRepo{
+		upsertLatestStateFunc: func(ctx context.Context, state *model.DeviceLatestState) error {
+			return nil
+		},
+	}
+	svc := NewTelemetryService(mockT, mockD, mockS, websocket.NewHub(zap.NewNop()), zap.NewNop())
 
 	input := CreateEngineTelemetryInput{
 		DeviceID: deviceID,
@@ -78,7 +93,7 @@ func TestTelemetryService_GetLatestEngine_Success(t *testing.T) {
 			return &model.EngineTelemetry{DeviceID: id}, nil
 		},
 	}
-	svc := NewTelemetryService(mockT, nil, zap.NewNop())
+	svc := NewTelemetryService(mockT, nil, nil, nil, zap.NewNop())
 
 	output, err := svc.GetLatestEngine(context.Background(), deviceID)
 	if err != nil {
@@ -96,7 +111,7 @@ func TestTelemetryService_GetLatestEngine_NotFound(t *testing.T) {
 			return nil, repository.ErrTelemetryNotFound
 		},
 	}
-	svc := NewTelemetryService(mockT, nil, zap.NewNop())
+	svc := NewTelemetryService(mockT, nil, nil, nil, zap.NewNop())
 
 	_, err := svc.GetLatestEngine(context.Background(), deviceID)
 	if err == nil || err != ErrTelemetryNotFound {

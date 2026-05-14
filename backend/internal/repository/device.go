@@ -16,7 +16,6 @@ import (
 // DeviceFilter carries the validated parameters for list queries.
 type DeviceFilter struct {
 	Search   string // matches device_code OR name (ILIKE)
-	IsOnline *bool  // nil = no filter, true/false = filter by online state
 	Status   string // empty = no filter; values: active | inactive | maintenance
 	Page     int    // 1-based
 	Limit    int    // rows per page (max enforced at service layer)
@@ -83,7 +82,7 @@ func (r *deviceRepository) Create(ctx context.Context, device *model.Device) err
 //
 // Query optimisations:
 //   - Uses trigram GIN indexes via ILIKE for search.
-//   - Partial indexes on is_online and status (deleted_at IS NULL predicate).
+//   - Partial indexes on status (deleted_at IS NULL predicate).
 //   - COUNT uses a separate query so the main fetch does not carry an
 //     expensive COUNT(*) OVER().
 func (r *deviceRepository) FindAll(ctx context.Context, filter DeviceFilter) (*DeviceListResult, error) {
@@ -97,10 +96,6 @@ func (r *deviceRepository) FindAll(ctx context.Context, filter DeviceFilter) (*D
 		base = base.Where("device_code ILIKE ? OR name ILIKE ? OR engine_id ILIKE ? OR gsm_number ILIKE ?", pattern, pattern, pattern, pattern)
 	}
 
-	// ── Online filter ─────────────────────────────────────────────
-	if filter.IsOnline != nil {
-		base = base.Where("is_online = ?", *filter.IsOnline)
-	}
 
 	// ── Status filter ─────────────────────────────────────────────
 	if filter.Status != "" {

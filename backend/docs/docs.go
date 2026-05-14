@@ -43,7 +43,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.LoginRequest"
+                            "$ref": "#/definitions/handler.LoginRequest"
                         }
                     }
                 ],
@@ -53,13 +53,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput"
+                                            "$ref": "#/definitions/service.LoginOutput"
                                         }
                                     }
                                 }
@@ -69,19 +69,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -112,7 +112,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.RefreshRequest"
+                            "$ref": "#/definitions/handler.RefreshRequest"
                         }
                     }
                 ],
@@ -120,19 +120,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Logged out",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -159,13 +159,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile"
+                                            "$ref": "#/definitions/service.UserProfile"
                                         }
                                     }
                                 }
@@ -175,19 +175,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -213,7 +213,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.RefreshRequest"
+                            "$ref": "#/definitions/handler.RefreshRequest"
                         }
                     }
                 ],
@@ -223,13 +223,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput"
+                                            "$ref": "#/definitions/service.RefreshOutput"
                                         }
                                     }
                                 }
@@ -239,19 +239,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid or expired refresh token",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -277,7 +277,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.RegisterRequest"
+                            "$ref": "#/definitions/handler.RegisterRequest"
                         }
                     }
                 ],
@@ -287,13 +287,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput"
+                                            "$ref": "#/definitions/service.RegisterOutput"
                                         }
                                     }
                                 }
@@ -303,19 +303,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Username or email already taken",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -363,13 +363,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Filter by connectivity: true | false",
+                        "description": "Filter by connectivity: true | false (DEPRECATED)",
                         "name": "online",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Sort column: created_at | name | device_code | last_seen | firmware_version",
+                        "description": "Sort column: created_at | name | device_code | firmware_version",
                         "name": "sort_by",
                         "in": "query"
                     },
@@ -386,13 +386,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput"
+                                            "$ref": "#/definitions/service.DeviceListOutput"
                                         }
                                     }
                                 }
@@ -402,13 +402,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -437,7 +437,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateDeviceRequest"
+                            "$ref": "#/definitions/handler.CreateDeviceRequest"
                         }
                     }
                 ],
@@ -447,13 +447,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput"
+                                            "$ref": "#/definitions/service.DeviceCreatedOutput"
                                         }
                                     }
                                 }
@@ -463,31 +463,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "device_code or serial_number already in use",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -523,13 +523,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail"
+                                            "$ref": "#/definitions/service.DeviceDetail"
                                         }
                                     }
                                 }
@@ -539,25 +539,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid UUID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -589,31 +589,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Device deleted",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Invalid UUID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -649,7 +649,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateDeviceRequest"
+                            "$ref": "#/definitions/handler.UpdateDeviceRequest"
                         }
                     }
                 ],
@@ -657,37 +657,37 @@ const docTemplate = `{
                     "200": {
                         "description": "Device updated",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Invalid UUID or request body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -725,7 +725,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateElectricalTelemetryRequest"
+                            "$ref": "#/definitions/handler.CreateElectricalTelemetryRequest"
                         }
                     }
                 ],
@@ -735,13 +735,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput"
+                                            "$ref": "#/definitions/service.ElectricalTelemetryOutput"
                                         }
                                     }
                                 }
@@ -751,25 +751,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid UUID or request body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -805,13 +805,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput"
+                                            "$ref": "#/definitions/service.ElectricalTelemetryOutput"
                                         }
                                     }
                                 }
@@ -821,25 +821,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid UUID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Telemetry not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -877,7 +877,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateEngineTelemetryRequest"
+                            "$ref": "#/definitions/handler.CreateEngineTelemetryRequest"
                         }
                     }
                 ],
@@ -887,13 +887,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput"
+                                            "$ref": "#/definitions/service.EngineTelemetryOutput"
                                         }
                                     }
                                 }
@@ -903,25 +903,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid UUID or request body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -957,13 +957,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput"
+                                            "$ref": "#/definitions/service.EngineTelemetryOutput"
                                         }
                                     }
                                 }
@@ -973,25 +973,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid UUID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Telemetry not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -1024,7 +1024,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.HeartbeatRequest"
+                            "$ref": "#/definitions/handler.HeartbeatRequest"
                         }
                     }
                 ],
@@ -1032,25 +1032,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Heartbeat recorded",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Invalid payload",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Device not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -1086,13 +1086,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput"
+                                            "$ref": "#/definitions/service.DeviceStatusOutput"
                                         }
                                     }
                                 }
@@ -1102,13 +1102,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Status not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                            "$ref": "#/definitions/response.ErrorResponse"
                         }
                     }
                 }
@@ -1130,13 +1130,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus"
+                                            "$ref": "#/definitions/service.HealthStatus"
                                         }
                                     }
                                 }
@@ -1148,13 +1148,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus"
+                                            "$ref": "#/definitions/service.HealthStatus"
                                         }
                                     }
                                 }
@@ -1166,443 +1166,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole": {
-            "type": "string",
-            "enum": [
-                "admin",
-                "operator",
-                "viewer"
-            ],
-            "x-enum-varnames": [
-                "RoleAdmin",
-                "RoleOperator",
-                "RoleViewer"
-            ]
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput": {
-            "type": "object",
-            "properties": {
-                "device_token": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_code": {
-                    "type": "string"
-                },
-                "engine_id": {
-                    "type": "string"
-                },
-                "firmware_version": {
-                    "type": "string"
-                },
-                "gsm_number": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_online": {
-                    "type": "boolean"
-                },
-                "last_seen": {
-                    "type": "string"
-                },
-                "metadata": {},
-                "name": {
-                    "type": "string"
-                },
-                "serial_number": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_code": {
-                    "type": "string"
-                },
-                "engine_id": {
-                    "type": "string"
-                },
-                "firmware_version": {
-                    "type": "string"
-                },
-                "gsm_number": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_online": {
-                    "type": "boolean"
-                },
-                "last_seen": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "serial_number": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem"
-                    }
-                },
-                "pagination": {
-                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput": {
-            "type": "object",
-            "properties": {
-                "can_connected": {
-                    "type": "boolean"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "gps_connected": {
-                    "type": "boolean"
-                },
-                "gsm_signal": {
-                    "type": "integer"
-                },
-                "is_online": {
-                    "type": "boolean"
-                },
-                "last_seen": {
-                    "type": "string"
-                },
-                "rs485_connected": {
-                    "type": "boolean"
-                },
-                "sd_card_ok": {
-                    "type": "boolean"
-                },
-                "server_connected": {
-                    "type": "boolean"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput": {
-            "type": "object",
-            "properties": {
-                "charge_alt_volt": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "earth_curr": {
-                    "type": "number"
-                },
-                "frequency": {
-                    "type": "number"
-                },
-                "l1_curr": {
-                    "type": "number"
-                },
-                "l1_l2_volt": {
-                    "type": "number"
-                },
-                "l1_n_volt": {
-                    "type": "number"
-                },
-                "l1_va": {
-                    "type": "number"
-                },
-                "l1_var": {
-                    "type": "number"
-                },
-                "l2_curr": {
-                    "type": "number"
-                },
-                "l2_l3_volt": {
-                    "type": "number"
-                },
-                "l2_n_volt": {
-                    "type": "number"
-                },
-                "l2_va": {
-                    "type": "number"
-                },
-                "l2_var": {
-                    "type": "number"
-                },
-                "l3_curr": {
-                    "type": "number"
-                },
-                "l3_l1_volt": {
-                    "type": "number"
-                },
-                "l3_n_volt": {
-                    "type": "number"
-                },
-                "l3_va": {
-                    "type": "number"
-                },
-                "l3_var": {
-                    "type": "number"
-                },
-                "percent_fp": {
-                    "type": "number"
-                },
-                "percent_fv": {
-                    "type": "number"
-                },
-                "pf_avg": {
-                    "type": "number"
-                },
-                "pf_l1": {
-                    "type": "number"
-                },
-                "pf_l2": {
-                    "type": "number"
-                },
-                "pf_l3": {
-                    "type": "number"
-                },
-                "total_va": {
-                    "type": "number"
-                },
-                "total_var": {
-                    "type": "number"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput": {
-            "type": "object",
-            "properties": {
-                "avg_fuel_rate": {
-                    "type": "number"
-                },
-                "batt_volt": {
-                    "type": "number"
-                },
-                "coolant_temperature": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "desired_operating_speed": {
-                    "type": "integer"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "ecu_temperature": {
-                    "type": "number"
-                },
-                "fuel_level_bottom": {
-                    "type": "number"
-                },
-                "fuel_level_pressure_1": {
-                    "type": "number"
-                },
-                "fuel_level_pressure_2": {
-                    "type": "number"
-                },
-                "fuel_level_top": {
-                    "type": "number"
-                },
-                "fuel_rate": {
-                    "type": "number"
-                },
-                "intake_manifold_pressure": {
-                    "type": "number"
-                },
-                "intake_manifold_temperature": {
-                    "type": "number"
-                },
-                "keyswitch_batt_potential": {
-                    "type": "number"
-                },
-                "oil_filter_out_pressure": {
-                    "type": "number"
-                },
-                "oil_pressure": {
-                    "type": "number"
-                },
-                "rated_power": {
-                    "type": "number"
-                },
-                "rated_speed": {
-                    "type": "integer"
-                },
-                "run_time": {
-                    "type": "integer"
-                },
-                "speed": {
-                    "type": "integer"
-                },
-                "total_fuel": {
-                    "type": "number"
-                },
-                "trip_fuel": {
-                    "type": "number"
-                },
-                "turbo_pressure": {
-                    "type": "number"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus": {
-            "type": "object",
-            "properties": {
-                "mqtt": {
-                    "type": "string"
-                },
-                "postgres": {
-                    "type": "string"
-                },
-                "redis": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "expires_in": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer"
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "expires_in": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "errors": {},
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "github_com_danisbagus_genset-monitoring_backend_pkg_response.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "internal_handler.CreateDeviceRequest": {
+        "handler.CreateDeviceRequest": {
             "type": "object",
             "required": [
                 "device_code",
@@ -1635,7 +1199,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.CreateElectricalTelemetryRequest": {
+        "handler.CreateElectricalTelemetryRequest": {
             "type": "object",
             "properties": {
                 "charge_alt_volt": {
@@ -1718,7 +1282,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.CreateEngineTelemetryRequest": {
+        "handler.CreateEngineTelemetryRequest": {
             "type": "object",
             "properties": {
                 "avg_fuel_rate": {
@@ -1789,7 +1353,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.HeartbeatRequest": {
+        "handler.HeartbeatRequest": {
             "type": "object",
             "required": [
                 "gsm_signal"
@@ -1806,6 +1370,9 @@ const docTemplate = `{
                     "maximum": 0,
                     "minimum": -120
                 },
+                "is_online": {
+                    "type": "boolean"
+                },
                 "rs485_connected": {
                     "type": "boolean"
                 },
@@ -1820,7 +1387,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.LoginRequest": {
+        "handler.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -1835,7 +1402,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.RefreshRequest": {
+        "handler.RefreshRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -1846,7 +1413,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.RegisterRequest": {
+        "handler.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1877,7 +1444,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.UpdateDeviceRequest": {
+        "handler.UpdateDeviceRequest": {
             "type": "object",
             "properties": {
                 "engine_id": {
@@ -1904,6 +1471,430 @@ const docTemplate = `{
                         "inactive",
                         "maintenance"
                     ]
+                }
+            }
+        },
+        "model.UserRole": {
+            "type": "string",
+            "enum": [
+                "admin",
+                "operator",
+                "viewer"
+            ],
+            "x-enum-varnames": [
+                "RoleAdmin",
+                "RoleOperator",
+                "RoleViewer"
+            ]
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "service.DeviceCreatedOutput": {
+            "type": "object",
+            "properties": {
+                "device_token": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.DeviceDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_code": {
+                    "type": "string"
+                },
+                "engine_id": {
+                    "type": "string"
+                },
+                "firmware_version": {
+                    "type": "string"
+                },
+                "gsm_number": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {},
+                "name": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.DeviceListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_code": {
+                    "type": "string"
+                },
+                "engine_id": {
+                    "type": "string"
+                },
+                "firmware_version": {
+                    "type": "string"
+                },
+                "gsm_number": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.DeviceListOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.DeviceListItem"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/service.PaginationMeta"
+                }
+            }
+        },
+        "service.DeviceStatusOutput": {
+            "type": "object",
+            "properties": {
+                "can_connected": {
+                    "type": "boolean"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "gps_connected": {
+                    "type": "boolean"
+                },
+                "gsm_signal": {
+                    "type": "integer"
+                },
+                "is_online": {
+                    "type": "boolean"
+                },
+                "last_seen": {
+                    "type": "string"
+                },
+                "rs485_connected": {
+                    "type": "boolean"
+                },
+                "sd_card_ok": {
+                    "type": "boolean"
+                },
+                "server_connected": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ElectricalTelemetryOutput": {
+            "type": "object",
+            "properties": {
+                "charge_alt_volt": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "earth_curr": {
+                    "type": "number"
+                },
+                "frequency": {
+                    "type": "number"
+                },
+                "l1_curr": {
+                    "type": "number"
+                },
+                "l1_l2_volt": {
+                    "type": "number"
+                },
+                "l1_n_volt": {
+                    "type": "number"
+                },
+                "l1_va": {
+                    "type": "number"
+                },
+                "l1_var": {
+                    "type": "number"
+                },
+                "l2_curr": {
+                    "type": "number"
+                },
+                "l2_l3_volt": {
+                    "type": "number"
+                },
+                "l2_n_volt": {
+                    "type": "number"
+                },
+                "l2_va": {
+                    "type": "number"
+                },
+                "l2_var": {
+                    "type": "number"
+                },
+                "l3_curr": {
+                    "type": "number"
+                },
+                "l3_l1_volt": {
+                    "type": "number"
+                },
+                "l3_n_volt": {
+                    "type": "number"
+                },
+                "l3_va": {
+                    "type": "number"
+                },
+                "l3_var": {
+                    "type": "number"
+                },
+                "percent_fp": {
+                    "type": "number"
+                },
+                "percent_fv": {
+                    "type": "number"
+                },
+                "pf_avg": {
+                    "type": "number"
+                },
+                "pf_l1": {
+                    "type": "number"
+                },
+                "pf_l2": {
+                    "type": "number"
+                },
+                "pf_l3": {
+                    "type": "number"
+                },
+                "total_va": {
+                    "type": "number"
+                },
+                "total_var": {
+                    "type": "number"
+                }
+            }
+        },
+        "service.EngineTelemetryOutput": {
+            "type": "object",
+            "properties": {
+                "avg_fuel_rate": {
+                    "type": "number"
+                },
+                "batt_volt": {
+                    "type": "number"
+                },
+                "coolant_temperature": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desired_operating_speed": {
+                    "type": "integer"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "ecu_temperature": {
+                    "type": "number"
+                },
+                "fuel_level_bottom": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_1": {
+                    "type": "number"
+                },
+                "fuel_level_pressure_2": {
+                    "type": "number"
+                },
+                "fuel_level_top": {
+                    "type": "number"
+                },
+                "fuel_rate": {
+                    "type": "number"
+                },
+                "intake_manifold_pressure": {
+                    "type": "number"
+                },
+                "intake_manifold_temperature": {
+                    "type": "number"
+                },
+                "keyswitch_batt_potential": {
+                    "type": "number"
+                },
+                "oil_filter_out_pressure": {
+                    "type": "number"
+                },
+                "oil_pressure": {
+                    "type": "number"
+                },
+                "rated_power": {
+                    "type": "number"
+                },
+                "rated_speed": {
+                    "type": "integer"
+                },
+                "run_time": {
+                    "type": "integer"
+                },
+                "speed": {
+                    "type": "integer"
+                },
+                "total_fuel": {
+                    "type": "number"
+                },
+                "trip_fuel": {
+                    "type": "number"
+                },
+                "turbo_pressure": {
+                    "type": "number"
+                }
+            }
+        },
+        "service.HealthStatus": {
+            "type": "object",
+            "properties": {
+                "mqtt": {
+                    "type": "string"
+                },
+                "postgres": {
+                    "type": "string"
+                },
+                "redis": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.LoginOutput": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/service.UserProfile"
+                }
+            }
+        },
+        "service.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.RefreshOutput": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.RegisterOutput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/model.UserRole"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserProfile": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/model.UserRole"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

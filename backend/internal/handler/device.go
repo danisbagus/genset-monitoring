@@ -67,8 +67,8 @@ func NewDeviceHandler(deviceSvc service.DeviceService, v *validator.Validator, l
 //	@Param			limit	query		int		false	"Items per page (default: 10, max: 100)"
 //	@Param			search	query		string	false	"Search by device_code or name"
 //	@Param			status	query		string	false	"Filter by status: active | inactive | maintenance"
-//	@Param			online	query		string	false	"Filter by connectivity: true | false"
-//	@Param			sort_by	query		string	false	"Sort column: created_at | name | device_code | last_seen | firmware_version"
+//	@Param			online	query		string	false	"Filter by connectivity: true | false (DEPRECATED)"
+//	@Param			sort_by	query		string	false	"Sort column: created_at | name | device_code | firmware_version"
 //	@Param			sort_dir	query		string	false	"Sort direction: asc | desc (default: desc)"
 //	@Success		200		{object}	response.Response{data=service.DeviceListOutput}	"Device list"
 //	@Failure		401		{object}	response.ErrorResponse								"Unauthorized"
@@ -78,21 +78,10 @@ func (h *DeviceHandler) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	// Parse optional boolean "online" query param
-	var online *bool
-	if raw := c.Query("online"); raw != "" {
-		v, err := strconv.ParseBool(raw)
-		if err != nil {
-			response.BadRequest(c, "invalid value for 'online' parameter, use true or false", nil)
-			return
-		}
-		online = &v
-	}
 
 	out, err := h.deviceSvc.List(c.Request.Context(), service.DeviceListInput{
 		Search:  c.Query("search"),
 		Status:  c.Query("status"),
-		Online:  online,
 		Page:    page,
 		Limit:   limit,
 		SortBy:  c.Query("sort_by"),

@@ -114,7 +114,7 @@ func main() {
 	authSvc := service.NewAuthService(userRepo, tokenRepo, jwtManager, cfg.JWT.RefreshExpiration, log)
 	deviceSvc := service.NewDeviceService(deviceRepo, log)
 	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, wsHub, log)
-	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, wsHub, log)
+	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
