@@ -108,6 +108,7 @@ func main() {
 	deviceRepo := repository.NewDeviceRepository(db)
 	statusRepo := repository.NewDeviceStatusRepository(db)
 	telemetryRepo := repository.NewTelemetryRepository(db)
+	dashboardRepo := repository.NewDashboardRepository(db)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
@@ -115,6 +116,7 @@ func main() {
 	deviceSvc := service.NewDeviceService(deviceRepo, log)
 	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, wsHub, log)
 	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, log)
+	dashboardSvc := service.NewDashboardService(dashboardRepo, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
@@ -122,6 +124,7 @@ func main() {
 	deviceHandler := handler.NewDeviceHandler(deviceSvc, v, log)
 	statusHandler := handler.NewDeviceStatusHandler(statusSvc, v, log)
 	telemetryHandler := handler.NewTelemetryHandler(telemetrySvc, v, log)
+	dashboardHandler := handler.NewDashboardHandler(dashboardSvc, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -142,6 +145,13 @@ func main() {
 	{
 		// Health
 		api.GET("/health", healthHandler.Check)
+
+		// Dashboard (protected)
+		dashboard := api.Group("/dashboard")
+		dashboard.Use(middleware.AuthRequired(jwtManager))
+		{
+			dashboard.GET("/summary", dashboardHandler.GetSummary)
+		}
 
 		// Auth (public)
 		auth := api.Group("/auth")

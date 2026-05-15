@@ -75,6 +75,8 @@ definitions:
         type: number
       pf_l3:
         type: number
+      telemetry_recorded_at:
+        type: string
       total_va:
         type: number
       total_var:
@@ -120,6 +122,8 @@ definitions:
         type: integer
       speed:
         type: integer
+      telemetry_recorded_at:
+        type: string
       total_fuel:
         type: number
       trip_fuel:
@@ -236,6 +240,21 @@ definitions:
       success:
         type: boolean
     type: object
+  service.DashboardSummaryOutput:
+    properties:
+      critical_alerts:
+        type: integer
+      offline_devices:
+        type: integer
+      online_devices:
+        type: integer
+      running_engines:
+        type: integer
+      total_devices:
+        type: integer
+      warning_alerts:
+        type: integer
+    type: object
   service.DeviceCreatedOutput:
     properties:
       device_token:
@@ -307,8 +326,6 @@ definitions:
         type: boolean
       gsm_signal:
         type: integer
-      is_online:
-        type: boolean
       last_seen:
         type: string
       rs485_connected:
@@ -685,6 +702,35 @@ paths:
       summary: Register
       tags:
       - auth
+  /api/v1/dashboard/summary:
+    get:
+      description: Mengambil ringkasan data statistik untuk dashboard utama (total
+        device, status koneksi, engine running, dan alert aktif)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard Summary berhasil diambil
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.DashboardSummaryOutput'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Dashboard Summary
+      tags:
+      - dashboard
   /api/v1/devices:
     get:
       description: Returns a paginated list of devices with optional search, status,
@@ -1106,7 +1152,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Receives health check from device and updates last_online_at timestamp
+      description: Receives health check from device and updates online status
       parameters:
       - description: Device UUID
         in: path

@@ -321,6 +321,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/dashboard/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets a summary of statistical data for the main dashboard (total devices, connection status, engines running, and active alerts)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Dashboard Summary",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard Summary berhasil diambil",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/service.DashboardSummaryOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/devices": {
             "get": {
                 "security": [
@@ -1274,6 +1323,9 @@ const docTemplate = `{
                 "pf_l3": {
                     "type": "number"
                 },
+                "telemetry_recorded_at": {
+                    "type": "string"
+                },
                 "total_va": {
                     "type": "number"
                 },
@@ -1342,6 +1394,9 @@ const docTemplate = `{
                 "speed": {
                     "type": "integer"
                 },
+                "telemetry_recorded_at": {
+                    "type": "string"
+                },
                 "total_fuel": {
                     "type": "number"
                 },
@@ -1369,9 +1424,6 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 0,
                     "minimum": -120
-                },
-                "is_online": {
-                    "type": "boolean"
                 },
                 "rs485_connected": {
                     "type": "boolean"
@@ -1511,6 +1563,29 @@ const docTemplate = `{
                 }
             }
         },
+        "service.DashboardSummaryOutput": {
+            "type": "object",
+            "properties": {
+                "critical_alerts": {
+                    "type": "integer"
+                },
+                "offline_devices": {
+                    "type": "integer"
+                },
+                "online_devices": {
+                    "type": "integer"
+                },
+                "running_engines": {
+                    "type": "integer"
+                },
+                "total_devices": {
+                    "type": "integer"
+                },
+                "warning_alerts": {
+                    "type": "integer"
+                }
+            }
+        },
         "service.DeviceCreatedOutput": {
             "type": "object",
             "properties": {
@@ -1618,9 +1693,6 @@ const docTemplate = `{
                 },
                 "gsm_signal": {
                     "type": "integer"
-                },
-                "is_online": {
-                    "type": "boolean"
                 },
                 "last_seen": {
                     "type": "string"
