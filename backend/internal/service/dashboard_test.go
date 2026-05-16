@@ -11,11 +11,21 @@ import (
 
 type mockDashboardRepo struct {
 	repository.DashboardRepository
-	getSummaryFunc func(ctx context.Context) (*model.DashboardSummary, error)
+	getSummaryFunc      func(ctx context.Context) (*model.DashboardSummary, error)
+	getDeviceStatesFunc func(ctx context.Context, filter repository.DeviceStateFilter) (*repository.DeviceStateResult, error)
+	getRecentAlertsFunc func(ctx context.Context, filter repository.RecentAlertFilter) (*repository.RecentAlertResult, error)
 }
 
 func (m *mockDashboardRepo) GetSummary(ctx context.Context) (*model.DashboardSummary, error) {
 	return m.getSummaryFunc(ctx)
+}
+
+func (m *mockDashboardRepo) GetDeviceStates(ctx context.Context, filter repository.DeviceStateFilter) (*repository.DeviceStateResult, error) {
+	return m.getDeviceStatesFunc(ctx, filter)
+}
+
+func (m *mockDashboardRepo) GetRecentAlerts(ctx context.Context, filter repository.RecentAlertFilter) (*repository.RecentAlertResult, error) {
+	return m.getRecentAlertsFunc(ctx, filter)
 }
 
 func TestDashboardService_GetSummary_Success(t *testing.T) {
@@ -56,5 +66,80 @@ func TestDashboardService_GetSummary_Success(t *testing.T) {
 	}
 	if output.WarningAlerts != 4 {
 		t.Errorf("expected warning_alerts 4, got %d", output.WarningAlerts)
+	}
+}
+
+func TestDashboardService_GetDeviceStates_Success(t *testing.T) {
+	mockRepo := &mockDashboardRepo{
+		getDeviceStatesFunc: func(ctx context.Context, filter repository.DeviceStateFilter) (*repository.DeviceStateResult, error) {
+			return &repository.DeviceStateResult{
+				Devices: []model.DeviceState{
+					{
+						DeviceID:     "device-1",
+						DeviceName:   "Genset 1",
+						DeviceOnline: true,
+					},
+				},
+				Total: 1,
+			}, nil
+		},
+	}
+
+	svc := NewDashboardService(mockRepo, zap.NewNop())
+	output, err := svc.GetDeviceStates(context.Background(), GetDeviceStatesQuery{Page: 1, Limit: 5})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(output.Devices) != 1 {
+		t.Fatalf("expected 1 device, got %d", len(output.Devices))
+	}
+
+	if output.Devices[0].DeviceName != "Genset 1" {
+		t.Errorf("expected device name Genset 1, got %s", output.Devices[0].DeviceName)
+	}
+
+	if output.Pagination.Total != 1 {
+		t.Errorf("expected total pagination 1, got %d", output.Pagination.Total)
+	}
+}
+
+func TestDashboardService_GetRecentAlerts_Success(t *testing.T) {
+	mockRepo := &mockDashboardRepo{
+		getRecentAlertsFunc: func(ctx context.Context, filter repository.RecentAlertFilter) (*repository.RecentAlertResult, error) {
+			return &repository.RecentAlertResult{
+				Alerts: []model.RecentAlert{
+					{
+						AlertID:      "alert-1",
+						DeviceID:     "device-1",
+						DeviceName:   "Genset 1",
+						Severity:     "critical",
+						Message:      "High Temp",
+						Acknowledged: false,
+					},
+				},
+				Total: 1,
+			}, nil
+		},
+	}
+
+	svc := NewDashboardService(mockRepo, zap.NewNop())
+	output, err := svc.GetRecentAlerts(context.Background(), GetRecentAlertsQuery{Page: 1, Limit: 5})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(output.Alerts) != 1 {
+		t.Fatalf("expected 1 alert, got %d", len(output.Alerts))
+	}
+
+	if output.Alerts[0].DeviceName != "Genset 1" {
+		t.Errorf("expected device name Genset 1, got %s", output.Alerts[0].DeviceName)
+	}
+
+	if output.Pagination.Total != 1 {
+		t.Errorf("expected total pagination 1, got %d", output.Pagination.Total)
 	}
 }

@@ -109,6 +109,7 @@ func main() {
 	statusRepo := repository.NewDeviceStatusRepository(db)
 	telemetryRepo := repository.NewTelemetryRepository(db)
 	dashboardRepo := repository.NewDashboardRepository(db)
+	alertRepo := repository.NewAlertRepository(db)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
@@ -117,6 +118,7 @@ func main() {
 	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, wsHub, log)
 	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, log)
 	dashboardSvc := service.NewDashboardService(dashboardRepo, log)
+	alertSvc := service.NewAlertService(alertRepo, deviceRepo, log)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
@@ -125,6 +127,7 @@ func main() {
 	statusHandler := handler.NewDeviceStatusHandler(statusSvc, v, log)
 	telemetryHandler := handler.NewTelemetryHandler(telemetrySvc, v, log)
 	dashboardHandler := handler.NewDashboardHandler(dashboardSvc, log)
+	alertHandler := handler.NewAlertHandler(alertSvc, v, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -151,6 +154,8 @@ func main() {
 		dashboard.Use(middleware.AuthRequired(jwtManager))
 		{
 			dashboard.GET("/summary", dashboardHandler.GetSummary)
+			dashboard.GET("/device-states", dashboardHandler.GetDeviceStates)
+			dashboard.GET("/recent-alerts", dashboardHandler.GetRecentAlerts)
 		}
 
 		// Auth (public)
@@ -188,6 +193,13 @@ func main() {
 			devices.GET("/:deviceID/engine/latest", telemetryHandler.GetLatestEngine)
 			devices.POST("/:deviceID/electrical", telemetryHandler.CreateElectrical)
 			devices.GET("/:deviceID/electrical/latest", telemetryHandler.GetLatestElectrical)
+		}
+
+		// Alerts (protected — requires valid JWT)
+		alerts := api.Group("/alerts")
+		alerts.Use(middleware.AuthRequired(jwtManager))
+		{
+			alerts.POST("", alertHandler.Create)
 		}
 
 		// WebSocket endpoint

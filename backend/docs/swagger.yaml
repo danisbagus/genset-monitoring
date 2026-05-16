@@ -1,6 +1,389 @@
 basePath: /
 definitions:
-  handler.CreateDeviceRequest:
+  github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole:
+    enum:
+    - admin
+    - operator
+    - viewer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleOperator
+    - RoleViewer
+  github_com_danisbagus_genset-monitoring_backend_internal_service.AlertCreatedOutput:
+    properties:
+      alert_id:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardDeviceStateOutput:
+    properties:
+      coolant_temperature:
+        type: number
+      device_id:
+        type: string
+      device_name:
+        type: string
+      device_online:
+        type: boolean
+      engine_running:
+        type: boolean
+      fuel_level:
+        type: number
+      last_seen_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardDeviceStatesOutput:
+    properties:
+      devices:
+        items:
+          $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardDeviceStateOutput'
+        type: array
+      pagination:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardSummaryOutput:
+    properties:
+      critical_alerts:
+        type: integer
+      offline_devices:
+        type: integer
+      online_devices:
+        type: integer
+      running_engines:
+        type: integer
+      total_devices:
+        type: integer
+      warning_alerts:
+        type: integer
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput:
+    properties:
+      device_token:
+        type: string
+      id:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail:
+    properties:
+      created_at:
+        type: string
+      device_code:
+        type: string
+      engine_id:
+        type: string
+      firmware_version:
+        type: string
+      gsm_number:
+        type: string
+      id:
+        type: string
+      metadata: {}
+      name:
+        type: string
+      serial_number:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem:
+    properties:
+      created_at:
+        type: string
+      device_code:
+        type: string
+      engine_id:
+        type: string
+      firmware_version:
+        type: string
+      gsm_number:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      serial_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput:
+    properties:
+      devices:
+        items:
+          $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListItem'
+        type: array
+      pagination:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput:
+    properties:
+      can_connected:
+        type: boolean
+      device_id:
+        type: string
+      gps_connected:
+        type: boolean
+      gsm_signal:
+        type: integer
+      last_seen:
+        type: string
+      rs485_connected:
+        type: boolean
+      sd_card_ok:
+        type: boolean
+      server_connected:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput:
+    properties:
+      charge_alt_volt:
+        type: number
+      created_at:
+        type: string
+      device_id:
+        type: string
+      earth_curr:
+        type: number
+      frequency:
+        type: number
+      l1_curr:
+        type: number
+      l1_l2_volt:
+        type: number
+      l1_n_volt:
+        type: number
+      l1_va:
+        type: number
+      l1_var:
+        type: number
+      l2_curr:
+        type: number
+      l2_l3_volt:
+        type: number
+      l2_n_volt:
+        type: number
+      l2_va:
+        type: number
+      l2_var:
+        type: number
+      l3_curr:
+        type: number
+      l3_l1_volt:
+        type: number
+      l3_n_volt:
+        type: number
+      l3_va:
+        type: number
+      l3_var:
+        type: number
+      percent_fp:
+        type: number
+      percent_fv:
+        type: number
+      pf_avg:
+        type: number
+      pf_l1:
+        type: number
+      pf_l2:
+        type: number
+      pf_l3:
+        type: number
+      total_va:
+        type: number
+      total_var:
+        type: number
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput:
+    properties:
+      avg_fuel_rate:
+        type: number
+      batt_volt:
+        type: number
+      coolant_temperature:
+        type: number
+      created_at:
+        type: string
+      desired_operating_speed:
+        type: integer
+      device_id:
+        type: string
+      ecu_temperature:
+        type: number
+      fuel_level_bottom:
+        type: number
+      fuel_level_pressure_1:
+        type: number
+      fuel_level_pressure_2:
+        type: number
+      fuel_level_top:
+        type: number
+      fuel_rate:
+        type: number
+      intake_manifold_pressure:
+        type: number
+      intake_manifold_temperature:
+        type: number
+      keyswitch_batt_potential:
+        type: number
+      oil_filter_out_pressure:
+        type: number
+      oil_pressure:
+        type: number
+      rated_power:
+        type: number
+      rated_speed:
+        type: integer
+      run_time:
+        type: integer
+      speed:
+        type: integer
+      total_fuel:
+        type: number
+      trip_fuel:
+        type: number
+      turbo_pressure:
+        type: number
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus:
+    properties:
+      mqtt:
+        type: string
+      postgres:
+        type: string
+      redis:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RecentAlertOutput:
+    properties:
+      acknowledged:
+        type: boolean
+      alert_id:
+        type: string
+      created_at:
+        type: string
+      device_id:
+        type: string
+      device_name:
+        type: string
+      message:
+        type: string
+      severity:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RecentAlertsOutput:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RecentAlertOutput'
+        type: array
+      pagination:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta'
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole'
+      username:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_model.UserRole'
+      username:
+        type: string
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse:
+    properties:
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  github_com_danisbagus_genset-monitoring_backend_pkg_response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  internal_handler.CreateAlertRequest:
+    properties:
+      device_id:
+        type: string
+      message:
+        type: string
+      metric_name:
+        type: string
+      metric_value:
+        type: number
+      severity:
+        enum:
+        - critical
+        - warning
+        - info
+        type: string
+      threshold_value:
+        type: number
+      title:
+        type: string
+      type:
+        enum:
+        - engine
+        - electrical
+        - connectivity
+        type: string
+    required:
+    - device_id
+    - message
+    - severity
+    - title
+    - type
+    type: object
+  internal_handler.CreateDeviceRequest:
     properties:
       device_code:
         maxLength: 100
@@ -25,7 +408,7 @@ definitions:
     - name
     - serial_number
     type: object
-  handler.CreateElectricalTelemetryRequest:
+  internal_handler.CreateElectricalTelemetryRequest:
     properties:
       charge_alt_volt:
         type: number
@@ -82,7 +465,7 @@ definitions:
       total_var:
         type: number
     type: object
-  handler.CreateEngineTelemetryRequest:
+  internal_handler.CreateEngineTelemetryRequest:
     properties:
       avg_fuel_rate:
         type: number
@@ -131,7 +514,7 @@ definitions:
       turbo_pressure:
         type: number
     type: object
-  handler.HeartbeatRequest:
+  internal_handler.HeartbeatRequest:
     properties:
       can_connected:
         type: boolean
@@ -152,7 +535,7 @@ definitions:
     required:
     - gsm_signal
     type: object
-  handler.LoginRequest:
+  internal_handler.LoginRequest:
     properties:
       password:
         type: string
@@ -162,14 +545,14 @@ definitions:
     - password
     - username
     type: object
-  handler.RefreshRequest:
+  internal_handler.RefreshRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  handler.RegisterRequest:
+  internal_handler.RegisterRequest:
     properties:
       email:
         type: string
@@ -192,7 +575,7 @@ definitions:
     - password
     - username
     type: object
-  handler.UpdateDeviceRequest:
+  internal_handler.UpdateDeviceRequest:
     properties:
       engine_id:
         maxLength: 100
@@ -214,299 +597,6 @@ definitions:
         - maintenance
         type: string
     type: object
-  model.UserRole:
-    enum:
-    - admin
-    - operator
-    - viewer
-    type: string
-    x-enum-varnames:
-    - RoleAdmin
-    - RoleOperator
-    - RoleViewer
-  response.ErrorResponse:
-    properties:
-      errors: {}
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  response.Response:
-    properties:
-      data: {}
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  service.DashboardSummaryOutput:
-    properties:
-      critical_alerts:
-        type: integer
-      offline_devices:
-        type: integer
-      online_devices:
-        type: integer
-      running_engines:
-        type: integer
-      total_devices:
-        type: integer
-      warning_alerts:
-        type: integer
-    type: object
-  service.DeviceCreatedOutput:
-    properties:
-      device_token:
-        type: string
-      id:
-        type: string
-    type: object
-  service.DeviceDetail:
-    properties:
-      created_at:
-        type: string
-      device_code:
-        type: string
-      engine_id:
-        type: string
-      firmware_version:
-        type: string
-      gsm_number:
-        type: string
-      id:
-        type: string
-      metadata: {}
-      name:
-        type: string
-      serial_number:
-        type: string
-      status:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  service.DeviceListItem:
-    properties:
-      created_at:
-        type: string
-      device_code:
-        type: string
-      engine_id:
-        type: string
-      firmware_version:
-        type: string
-      gsm_number:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      serial_number:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  service.DeviceListOutput:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/service.DeviceListItem'
-        type: array
-      pagination:
-        $ref: '#/definitions/service.PaginationMeta'
-    type: object
-  service.DeviceStatusOutput:
-    properties:
-      can_connected:
-        type: boolean
-      device_id:
-        type: string
-      gps_connected:
-        type: boolean
-      gsm_signal:
-        type: integer
-      last_seen:
-        type: string
-      rs485_connected:
-        type: boolean
-      sd_card_ok:
-        type: boolean
-      server_connected:
-        type: boolean
-      updated_at:
-        type: string
-    type: object
-  service.ElectricalTelemetryOutput:
-    properties:
-      charge_alt_volt:
-        type: number
-      created_at:
-        type: string
-      device_id:
-        type: string
-      earth_curr:
-        type: number
-      frequency:
-        type: number
-      l1_curr:
-        type: number
-      l1_l2_volt:
-        type: number
-      l1_n_volt:
-        type: number
-      l1_va:
-        type: number
-      l1_var:
-        type: number
-      l2_curr:
-        type: number
-      l2_l3_volt:
-        type: number
-      l2_n_volt:
-        type: number
-      l2_va:
-        type: number
-      l2_var:
-        type: number
-      l3_curr:
-        type: number
-      l3_l1_volt:
-        type: number
-      l3_n_volt:
-        type: number
-      l3_va:
-        type: number
-      l3_var:
-        type: number
-      percent_fp:
-        type: number
-      percent_fv:
-        type: number
-      pf_avg:
-        type: number
-      pf_l1:
-        type: number
-      pf_l2:
-        type: number
-      pf_l3:
-        type: number
-      total_va:
-        type: number
-      total_var:
-        type: number
-    type: object
-  service.EngineTelemetryOutput:
-    properties:
-      avg_fuel_rate:
-        type: number
-      batt_volt:
-        type: number
-      coolant_temperature:
-        type: number
-      created_at:
-        type: string
-      desired_operating_speed:
-        type: integer
-      device_id:
-        type: string
-      ecu_temperature:
-        type: number
-      fuel_level_bottom:
-        type: number
-      fuel_level_pressure_1:
-        type: number
-      fuel_level_pressure_2:
-        type: number
-      fuel_level_top:
-        type: number
-      fuel_rate:
-        type: number
-      intake_manifold_pressure:
-        type: number
-      intake_manifold_temperature:
-        type: number
-      keyswitch_batt_potential:
-        type: number
-      oil_filter_out_pressure:
-        type: number
-      oil_pressure:
-        type: number
-      rated_power:
-        type: number
-      rated_speed:
-        type: integer
-      run_time:
-        type: integer
-      speed:
-        type: integer
-      total_fuel:
-        type: number
-      trip_fuel:
-        type: number
-      turbo_pressure:
-        type: number
-    type: object
-  service.HealthStatus:
-    properties:
-      mqtt:
-        type: string
-      postgres:
-        type: string
-      redis:
-        type: string
-    type: object
-  service.LoginOutput:
-    properties:
-      access_token:
-        type: string
-      expires_in:
-        type: integer
-      refresh_token:
-        type: string
-      user:
-        $ref: '#/definitions/service.UserProfile'
-    type: object
-  service.PaginationMeta:
-    properties:
-      limit:
-        type: integer
-      page:
-        type: integer
-      total:
-        type: integer
-    type: object
-  service.RefreshOutput:
-    properties:
-      access_token:
-        type: string
-      expires_in:
-        type: integer
-      refresh_token:
-        type: string
-    type: object
-  service.RegisterOutput:
-    properties:
-      email:
-        type: string
-      id:
-        type: string
-      role:
-        $ref: '#/definitions/model.UserRole'
-      username:
-        type: string
-    type: object
-  service.UserProfile:
-    properties:
-      email:
-        type: string
-      id:
-        type: string
-      role:
-        $ref: '#/definitions/model.UserRole'
-      username:
-        type: string
-    type: object
 host: localhost:8080
 info:
   contact:
@@ -520,6 +610,51 @@ info:
   title: Genset Monitoring API
   version: "1.0"
 paths:
+  /api/v1/alerts:
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new alert record into the alerts table.
+      parameters:
+      - description: Create alert payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Alert created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.AlertCreatedOutput'
+              type: object
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Alert
+      tags:
+      - alerts
   /api/v1/auth/login:
     post:
       consumes:
@@ -531,7 +666,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginRequest'
+          $ref: '#/definitions/internal_handler.LoginRequest'
       produces:
       - application/json
       responses:
@@ -539,23 +674,23 @@ paths:
           description: Login successful
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.LoginOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.LoginOutput'
               type: object
         "400":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Invalid credentials
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       summary: Login
       tags:
       - auth
@@ -570,22 +705,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.RefreshRequest'
+          $ref: '#/definitions/internal_handler.RefreshRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Logged out
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
         "400":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Logout
@@ -601,23 +736,23 @@ paths:
           description: Current user profile
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.UserProfile'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile'
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Current User
@@ -635,7 +770,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.RefreshRequest'
+          $ref: '#/definitions/internal_handler.RefreshRequest'
       produces:
       - application/json
       responses:
@@ -643,23 +778,23 @@ paths:
           description: Tokens refreshed
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.RefreshOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RefreshOutput'
               type: object
         "400":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Invalid or expired refresh token
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       summary: Refresh Token
       tags:
       - auth
@@ -674,7 +809,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.RegisterRequest'
+          $ref: '#/definitions/internal_handler.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -682,30 +817,99 @@ paths:
           description: User created
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.RegisterOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RegisterOutput'
               type: object
         "400":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "409":
           description: Username or email already taken
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       summary: Register
       tags:
       - auth
+  /api/v1/dashboard/device-states:
+    get:
+      description: Gets a paginated list of device states for the main dashboard
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Limit number (default: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard Device States berhasil diambil
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardDeviceStatesOutput'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Dashboard Device States
+      tags:
+      - dashboard
+  /api/v1/dashboard/recent-alerts:
+    get:
+      description: Gets a paginated list of recent alerts for the main dashboard
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Limit number (default: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard Recent Alerts berhasil diambil
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.RecentAlertsOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Dashboard Recent Alerts
+      tags:
+      - dashboard
   /api/v1/dashboard/summary:
     get:
-      description: Mengambil ringkasan data statistik untuk dashboard utama (total
-        device, status koneksi, engine running, dan alert aktif)
+      description: Gets a summary of statistical data for the main dashboard (total
+        devices, connection status, engines running, and active alerts)
       produces:
       - application/json
       responses:
@@ -713,19 +917,19 @@ paths:
           description: Dashboard Summary berhasil diambil
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.DashboardSummaryOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DashboardSummaryOutput'
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Dashboard Summary
@@ -771,19 +975,19 @@ paths:
           description: Device list
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.DeviceListOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceListOutput'
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List Devices
@@ -800,7 +1004,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateDeviceRequest'
+          $ref: '#/definitions/internal_handler.CreateDeviceRequest'
       produces:
       - application/json
       responses:
@@ -808,31 +1012,31 @@ paths:
           description: Device created
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.DeviceCreatedOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceCreatedOutput'
               type: object
         "400":
           description: Invalid request body
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "409":
           description: device_code or serial_number already in use
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "422":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create Device
@@ -853,23 +1057,23 @@ paths:
         "200":
           description: Device deleted
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
         "400":
           description: Invalid UUID
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete Device
@@ -890,27 +1094,27 @@ paths:
           description: Device detail
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.DeviceDetail'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceDetail'
               type: object
         "400":
           description: Invalid UUID
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get Device Detail
@@ -931,34 +1135,34 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.UpdateDeviceRequest'
+          $ref: '#/definitions/internal_handler.UpdateDeviceRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Device updated
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
         "400":
           description: Invalid UUID or request body
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "422":
           description: Validation error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update Device
@@ -980,7 +1184,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateElectricalTelemetryRequest'
+          $ref: '#/definitions/internal_handler.CreateElectricalTelemetryRequest'
       produces:
       - application/json
       responses:
@@ -988,27 +1192,27 @@ paths:
           description: Telemetry created
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.ElectricalTelemetryOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput'
               type: object
         "400":
           description: Invalid UUID or request body
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create Electrical Telemetry
@@ -1030,27 +1234,27 @@ paths:
           description: Latest telemetry
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.ElectricalTelemetryOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput'
               type: object
         "400":
           description: Invalid UUID
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Telemetry not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get Latest Electrical Telemetry
@@ -1072,7 +1276,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateEngineTelemetryRequest'
+          $ref: '#/definitions/internal_handler.CreateEngineTelemetryRequest'
       produces:
       - application/json
       responses:
@@ -1080,27 +1284,27 @@ paths:
           description: Telemetry created
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.EngineTelemetryOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput'
               type: object
         "400":
           description: Invalid UUID or request body
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create Engine Telemetry
@@ -1122,27 +1326,27 @@ paths:
           description: Latest telemetry
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.EngineTelemetryOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput'
               type: object
         "400":
           description: Invalid UUID
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Telemetry not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get Latest Engine Telemetry
@@ -1164,26 +1368,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.HeartbeatRequest'
+          $ref: '#/definitions/internal_handler.HeartbeatRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Heartbeat recorded
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
         "400":
           description: Invalid payload
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "404":
           description: Device not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       summary: Device Heartbeat
       tags:
       - status
@@ -1203,19 +1407,19 @@ paths:
           description: Status retrieved
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.DeviceStatusOutput'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.DeviceStatusOutput'
               type: object
         "404":
           description: Status not found
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get Device Status
@@ -1232,19 +1436,19 @@ paths:
           description: Service healthy
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.HealthStatus'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus'
               type: object
         "503":
           description: Service degraded
           schema:
             allOf:
-            - $ref: '#/definitions/response.Response'
+            - $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/service.HealthStatus'
+                  $ref: '#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.HealthStatus'
               type: object
       summary: Health Check
       tags:

@@ -19,30 +19,30 @@ import (
 
 // DeviceListItem is a compact device representation used in list responses.
 type DeviceListItem struct {
-	ID              uuid.UUID  `json:"id"`
-	DeviceCode      string     `json:"device_code"`
-	Name            string     `json:"name"`
-	SerialNumber    string     `json:"serial_number"`
-	EngineID        string     `json:"engine_id"`
-	GSMNumber       string     `json:"gsm_number"`
-	FirmwareVersion string     `json:"firmware_version"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
+	ID              uuid.UUID `json:"id"`
+	DeviceCode      string    `json:"device_code"`
+	Name            string    `json:"name"`
+	SerialNumber    string    `json:"serial_number"`
+	EngineID        string    `json:"engine_id"`
+	GSMNumber       string    `json:"gsm_number"`
+	FirmwareVersion string    `json:"firmware_version"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // DeviceDetail is the full device representation for detail responses.
 type DeviceDetail struct {
-	ID              uuid.UUID    `json:"id"`
-	DeviceCode      string       `json:"device_code"`
-	Name            string       `json:"name"`
-	SerialNumber    string       `json:"serial_number"`
-	EngineID        string       `json:"engine_id"`
-	GSMNumber       string       `json:"gsm_number"`
-	FirmwareVersion string       `json:"firmware_version"`
-	Status          string       `json:"status"`
-	Metadata        interface{}  `json:"metadata,omitempty"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
+	ID              uuid.UUID   `json:"id"`
+	DeviceCode      string      `json:"device_code"`
+	Name            string      `json:"name"`
+	SerialNumber    string      `json:"serial_number"`
+	EngineID        string      `json:"engine_id"`
+	GSMNumber       string      `json:"gsm_number"`
+	FirmwareVersion string      `json:"firmware_version"`
+	Status          string      `json:"status"`
+	Metadata        interface{} `json:"metadata,omitempty"`
+	CreatedAt       time.Time   `json:"created_at"`
+	UpdatedAt       time.Time   `json:"updated_at"`
 }
 
 // DeviceCreatedOutput is returned after a successful device creation.
@@ -54,7 +54,7 @@ type DeviceCreatedOutput struct {
 
 // DeviceListOutput wraps the list items with pagination metadata.
 type DeviceListOutput struct {
-	Data       []*DeviceListItem `json:"data"`
+	Devices    []*DeviceListItem `json:"devices"`
 	Pagination PaginationMeta    `json:"pagination"`
 }
 
@@ -146,12 +146,12 @@ func (s *deviceService) List(ctx context.Context, input DeviceListInput) (*Devic
 	}
 
 	result, err := s.deviceRepo.FindAll(ctx, repository.DeviceFilter{
-		Search:   input.Search,
-		Status:   input.Status,
-		Page:     input.Page,
-		Limit:    input.Limit,
-		SortBy:   sortBy,
-		SortDir:  input.SortDir,
+		Search:  input.Search,
+		Status:  input.Status,
+		Page:    input.Page,
+		Limit:   input.Limit,
+		SortBy:  sortBy,
+		SortDir: input.SortDir,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("deviceService.List: %w", err)
@@ -173,7 +173,7 @@ func (s *deviceService) List(ctx context.Context, input DeviceListInput) (*Devic
 	}
 
 	return &DeviceListOutput{
-		Data: items,
+		Devices: items,
 		Pagination: PaginationMeta{
 			Page:  input.Page,
 			Limit: input.Limit,
@@ -339,7 +339,7 @@ func deviceToDetail(d *model.Device) *DeviceDetail {
 // ── Sentinel errors ───────────────────────────────────────────────
 
 var (
-	ErrDeviceNotFound    = errors.New("device not found")
-	ErrDeviceCodeExists  = errors.New("device_code already in use")
+	ErrDeviceNotFound     = errors.New("device not found")
+	ErrDeviceCodeExists   = errors.New("device_code already in use")
 	ErrSerialNumberExists = errors.New("serial_number already in use")
 )
