@@ -77,11 +77,11 @@ const handleSubmit = async () => {
           type="text"
           placeholder="admin_genset"
           :disabled="isLoading"
-          class="w-full bg-slate-900 border px-4 py-3 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-all"
+          class="w-full bg-slate-50 dark:bg-slate-900 border px-4 py-3 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-all"
           :class="[
             errors.username 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' 
-              : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
+              : 'border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
           ]"
         />
         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -111,11 +111,11 @@ const handleSubmit = async () => {
           type="password"
           placeholder="••••••••"
           :disabled="isLoading"
-          class="w-full bg-slate-900 border px-4 py-3 rounded text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-all"
+          class="w-full bg-slate-50 dark:bg-slate-900 border px-4 py-3 rounded text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-all"
           :class="[
             errors.password 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' 
-              : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
+              : 'border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
           ]"
         />
         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -136,7 +136,7 @@ const handleSubmit = async () => {
           :disabled="isLoading"
           class="sr-only peer"
         />
-        <div class="w-4 h-4 bg-slate-900 border border-slate-700 rounded peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center">
+        <div class="w-4 h-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center">
           <svg viewBox="0 0 24 24" class="w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform" fill="none" stroke="currentColor" stroke-width="3">
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -167,7 +167,7 @@ const handleSubmit = async () => {
     </button>
 
     <!-- System Info -->
-    <div class="pt-6 border-t border-slate-800">
+    <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
       <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono tracking-tight">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
         SYSTEM SECURE | SSL ENCRYPTED | ENDPOINT VALIDATED

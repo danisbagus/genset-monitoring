@@ -26,7 +26,8 @@ const formatDate = (dateStr: string) => {
 
 <template>
   <BaseCard title="Latest Alerts" no-padding>
-    <div class="overflow-x-auto">
+    <!-- Desktop Table View -->
+    <div class="hidden md:block overflow-x-auto">
       <table class="w-full text-left">
         <thead>
           <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
@@ -60,10 +61,10 @@ const formatDate = (dateStr: string) => {
           <tr 
             v-for="alert in alerts" 
             :key="alert.alert_id"
-            class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+            class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
             :class="{'bg-rose-50/30 dark:bg-rose-900/10': alert.severity === 'critical' && !alert.acknowledged}"
           >
-            <td class="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">
+            <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
               {{ alert.device_name }}
             </td>
             <td class="px-6 py-4">
@@ -76,13 +77,13 @@ const formatDate = (dateStr: string) => {
             </td>
             <td class="px-6 py-4">
               <span 
-                class="text-xs font-medium"
-                :class="alert.acknowledged ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'"
+                class="text-xs font-semibold px-2 py-1 rounded-full"
+                :class="alert.acknowledged ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'"
               >
                 {{ alert.acknowledged ? 'Acknowledged' : 'Pending' }}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+            <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
               {{ formatDate(alert.created_at) }}
             </td>
           </tr>
@@ -90,10 +91,46 @@ const formatDate = (dateStr: string) => {
       </table>
     </div>
 
+    <!-- Mobile Card View -->
+    <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+      <div v-if="loading" class="p-4 space-y-4">
+        <div v-for="i in 3" :key="i" class="animate-pulse space-y-2">
+          <div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+          <div class="h-4 bg-slate-100 dark:bg-slate-800 rounded w-full"></div>
+        </div>
+      </div>
+      
+      <div 
+        v-for="alert in alerts" 
+        :key="alert.alert_id"
+        class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+        :class="{'bg-rose-50/30 dark:bg-rose-900/10': alert.severity === 'critical' && !alert.acknowledged}"
+      >
+        <div class="flex justify-between items-start mb-2">
+          <div class="font-bold text-slate-900 dark:text-slate-100">{{ alert.device_name }}</div>
+          <BaseBadge :variant="getSeverityVariant(alert.severity)" size="sm">
+            {{ alert.severity }}
+          </BaseBadge>
+        </div>
+        <p class="text-sm text-slate-700 dark:text-slate-300 mb-3">{{ alert.message }}</p>
+        <div class="flex justify-between items-center text-xs">
+          <span 
+            class="font-medium"
+            :class="alert.acknowledged ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'"
+          >
+            {{ alert.acknowledged ? 'Acknowledged' : 'Pending' }}
+          </span>
+          <span class="text-slate-500">{{ formatDate(alert.created_at) }}</span>
+        </div>
+      </div>
+    </div>
+
     <template #footer>
       <div class="flex items-center justify-between">
-        <span class="text-sm text-slate-500">Showing {{ alerts.length }} alerts</span>
-        <button class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">View All History</button>
+        <span class="text-xs sm:text-sm text-slate-500 font-medium">Showing {{ alerts.length }} latest alerts</span>
+        <button class="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+          View All History
+        </button>
       </div>
     </template>
   </BaseCard>
