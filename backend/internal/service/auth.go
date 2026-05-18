@@ -41,10 +41,10 @@ type LoginInput struct {
 
 // LoginOutput is returned after a successful login.
 type LoginOutput struct {
-	AccessToken  string         `json:"access_token"`
-	RefreshToken string         `json:"refresh_token"`
-	ExpiresIn    int64          `json:"expires_in"`
-	User         UserProfile    `json:"user"`
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
+	ExpiresIn    int64       `json:"expires_in"`
+	User         UserProfile `json:"user"`
 }
 
 // RefreshOutput is returned after a successful token refresh.
@@ -76,11 +76,11 @@ type AuthService interface {
 // ── Implementation ────────────────────────────────────────────────
 
 type authService struct {
-	userRepo    repository.UserRepository
-	tokenRepo   repository.RefreshTokenRepository
-	jwtManager  *jwtutil.Manager
-	refreshTTL  time.Duration
-	log         *zap.Logger
+	userRepo   repository.UserRepository
+	tokenRepo  repository.RefreshTokenRepository
+	jwtManager *jwtutil.Manager
+	refreshTTL time.Duration
+	log        *zap.Logger
 }
 
 // NewAuthService constructs an AuthService with its dependencies.

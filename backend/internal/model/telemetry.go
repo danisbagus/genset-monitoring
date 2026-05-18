@@ -8,32 +8,32 @@ import (
 
 // EngineTelemetry represents engine performance data and sensor readings.
 type EngineTelemetry struct {
-	ID                       uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
-	DeviceID                 uuid.UUID `gorm:"type:uuid;not null;index" json:"device_id"`
-	Device                   *Device   `gorm:"foreignKey:DeviceID" json:"device,omitempty"`
-	Speed                    *int32    `json:"speed"`
-	FuelRate                 *float32  `json:"fuel_rate"`
-	RatedPower               *float32  `json:"rated_power"`
-	RatedSpeed               *int32    `json:"rated_speed"`
-	OilFilterOutPressure     *float32  `json:"oil_filter_out_pressure"`
-	DesiredOperatingSpeed    *int32    `json:"desired_operating_speed"`
-	OilPressure              *float32  `json:"oil_pressure"`
-	CoolantTemperature       *float32  `json:"coolant_temperature"`
-	TripFuel                 *float32  `json:"trip_fuel"`
-	TotalFuel                *float32  `json:"total_fuel"`
-	AvgFuelRate              *float32  `json:"avg_fuel_rate"`
-	IntakeManifoldPressure   *float32  `json:"intake_manifold_pressure"`
+	ID                        uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
+	DeviceID                  uuid.UUID `gorm:"type:uuid;not null;index" json:"device_id"`
+	Device                    *Device   `gorm:"foreignKey:DeviceID" json:"device,omitempty"`
+	Speed                     *int32    `json:"speed"`
+	FuelRate                  *float32  `json:"fuel_rate"`
+	RatedPower                *float32  `json:"rated_power"`
+	RatedSpeed                *int32    `json:"rated_speed"`
+	OilFilterOutPressure      *float32  `json:"oil_filter_out_pressure"`
+	DesiredOperatingSpeed     *int32    `json:"desired_operating_speed"`
+	OilPressure               *float32  `json:"oil_pressure"`
+	CoolantTemperature        *float32  `json:"coolant_temperature"`
+	TripFuel                  *float32  `json:"trip_fuel"`
+	TotalFuel                 *float32  `json:"total_fuel"`
+	AvgFuelRate               *float32  `json:"avg_fuel_rate"`
+	IntakeManifoldPressure    *float32  `json:"intake_manifold_pressure"`
 	IntakeManifoldTemperature *float32  `json:"intake_manifold_temperature"`
-	KeyswitchBattPotential   *float32  `json:"keyswitch_batt_potential"`
-	BattVolt                 *float32  `json:"batt_volt"`
-	EcuTemperature           *float32  `json:"ecu_temperature"`
-	RunTime                  *int64    `json:"run_time"`
-	FuelLevelTop             *float32  `json:"fuel_level_top"`
-	FuelLevelBottom          *float32  `json:"fuel_level_bottom"`
-	FuelLevelPressure1       *float32  `gorm:"column:fuel_level_pressure_1" json:"fuel_level_pressure_1"`
-	FuelLevelPressure2       *float32  `gorm:"column:fuel_level_pressure_2" json:"fuel_level_pressure_2"`
-	TurboPressure            *float32  `json:"turbo_pressure"`
-	CreatedAt                time.Time `gorm:"not null;default:now();index" json:"created_at"`
+	KeyswitchBattPotential    *float32  `json:"keyswitch_batt_potential"`
+	BattVolt                  *float32  `json:"batt_volt"`
+	EcuTemperature            *float32  `json:"ecu_temperature"`
+	RunTime                   *int64    `json:"run_time"`
+	FuelLevelTop              *float32  `json:"fuel_level_top"`
+	FuelLevelBottom           *float32  `json:"fuel_level_bottom"`
+	FuelLevelPressure1        *float32  `gorm:"column:fuel_level_pressure_1" json:"fuel_level_pressure_1"`
+	FuelLevelPressure2        *float32  `gorm:"column:fuel_level_pressure_2" json:"fuel_level_pressure_2"`
+	TurboPressure             *float32  `json:"turbo_pressure"`
+	CreatedAt                 time.Time `gorm:"not null;default:now();index" json:"created_at"`
 }
 
 // TableName overrides the table name used by EngineTelemetry to `engine_telemetry`.

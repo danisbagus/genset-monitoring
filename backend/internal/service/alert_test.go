@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -43,7 +44,7 @@ func TestAlertService_Create_Success(t *testing.T) {
 		},
 	}
 
-	svc := NewAlertService(mockAlertRepo, mockDeviceRepo, zap.NewNop())
+	svc := NewAlertService(mockAlertRepo, mockDeviceRepo, pubsub.NewBroker(), zap.NewNop())
 	input := CreateAlertInput{
 		DeviceID: deviceID,
 		Type:     model.TypeEngine,
@@ -70,7 +71,7 @@ func TestAlertService_Create_DeviceNotFound(t *testing.T) {
 		},
 	}
 
-	svc := NewAlertService(nil, mockDeviceRepo, zap.NewNop())
+	svc := NewAlertService(nil, mockDeviceRepo, pubsub.NewBroker(), zap.NewNop())
 	input := CreateAlertInput{
 		DeviceID: uuid.New(),
 	}

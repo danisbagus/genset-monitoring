@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
@@ -35,12 +36,12 @@ type GetRecentAlertsQuery struct {
 
 // DashboardDeviceStateOutput represents a single device state in the dashboard list
 type DashboardDeviceStateOutput struct {
-	DeviceID           string    `json:"device_id"`
-	DeviceName         string    `json:"device_name"`
-	DeviceOnline       bool      `json:"device_online"`
-	EngineRunning      bool      `json:"engine_running"`
-	FuelLevel          float64   `json:"fuel_level"`
-	CoolantTemperature float64   `json:"coolant_temperature"`
+	DeviceID           string     `json:"device_id"`
+	DeviceName         string     `json:"device_name"`
+	DeviceOnline       bool       `json:"device_online"`
+	EngineRunning      bool       `json:"engine_running"`
+	FuelLevel          float64    `json:"fuel_level"`
+	CoolantTemperature float64    `json:"coolant_temperature"`
 	LastSeenAt         *time.Time `json:"last_seen_at"`
 }
 
@@ -81,6 +82,9 @@ type DashboardService interface {
 type dashboardService struct {
 	dashboardRepo repository.DashboardRepository
 	log           *zap.Logger
+	mu            sync.RWMutex
+	cachedSummary *DashboardSummaryOutput
+	cacheExpiry   time.Time
 }
 
 // NewDashboardService create new instance of DashboardService
@@ -93,19 +97,41 @@ func NewDashboardService(dashboardRepo repository.DashboardRepository, log *zap.
 
 // GetSummary get dashboard summary
 func (s *dashboardService) GetSummary(ctx context.Context) (*DashboardSummaryOutput, error) {
+	s.mu.RLock()
+	if s.cachedSummary != nil && time.Now().Before(s.cacheExpiry) {
+		defer s.mu.RUnlock()
+		copyVal := *s.cachedSummary
+		return &copyVal, nil
+	}
+	s.mu.RUnlock()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Double-check cache under write lock
+	if s.cachedSummary != nil && time.Now().Before(s.cacheExpiry) {
+		copyVal := *s.cachedSummary
+		return &copyVal, nil
+	}
+
 	summary, err := s.dashboardRepo.GetSummary(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("dashboardService.GetSummary: %w", err)
 	}
 
-	return &DashboardSummaryOutput{
+	now := time.Now().UTC()
+	s.cachedSummary = &DashboardSummaryOutput{
 		TotalDevices:   summary.TotalDevices,
 		OnlineDevices:  summary.OnlineDevices,
 		OfflineDevices: summary.OfflineDevices,
 		RunningEngines: summary.RunningEngines,
 		CriticalAlerts: summary.CriticalAlerts,
 		WarningAlerts:  summary.WarningAlerts,
-	}, nil
+	}
+	s.cacheExpiry = now.Add(1 * time.Second)
+
+	copyVal := *s.cachedSummary
+	return &copyVal, nil
 }
 
 // GetDeviceStates get dashboard device states

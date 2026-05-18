@@ -15,12 +15,12 @@ import (
 
 // DeviceFilter carries the validated parameters for list queries.
 type DeviceFilter struct {
-	Search   string // matches device_code OR name (ILIKE)
-	Status   string // empty = no filter; values: active | inactive | maintenance
-	Page     int    // 1-based
-	Limit    int    // rows per page (max enforced at service layer)
-	SortBy   string // column name (allow-listed in service layer)
-	SortDir  string // "asc" | "desc"
+	Search  string // matches device_code OR name (ILIKE)
+	Status  string // empty = no filter; values: active | inactive | maintenance
+	Page    int    // 1-based
+	Limit   int    // rows per page (max enforced at service layer)
+	SortBy  string // column name (allow-listed in service layer)
+	SortDir string // "asc" | "desc"
 }
 
 // DeviceListResult is the raw result returned from FindAll.
@@ -95,7 +95,6 @@ func (r *deviceRepository) FindAll(ctx context.Context, filter DeviceFilter) (*D
 		pattern := "%" + filter.Search + "%"
 		base = base.Where("device_code ILIKE ? OR name ILIKE ? OR engine_id ILIKE ? OR gsm_number ILIKE ?", pattern, pattern, pattern, pattern)
 	}
-
 
 	// ── Status filter ─────────────────────────────────────────────
 	if filter.Status != "" {

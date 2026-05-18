@@ -19,9 +19,9 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name        string        `mapstructure:"APP_NAME"`
-	Env         string        `mapstructure:"APP_ENV"`
-	Port        string        `mapstructure:"APP_PORT"`
+	Name         string        `mapstructure:"APP_NAME"`
+	Env          string        `mapstructure:"APP_ENV"`
+	Port         string        `mapstructure:"APP_PORT"`
 	Debug        bool          `mapstructure:"APP_DEBUG"`
 	ReadTimeout  time.Duration `mapstructure:"APP_READ_TIMEOUT"`
 	WriteTimeout time.Duration `mapstructure:"APP_WRITE_TIMEOUT"`
@@ -86,9 +86,9 @@ func Load(envFile string) (*Config, error) {
 	cfg := &Config{}
 
 	cfg.App = AppConfig{
-		Name:        v.GetString("APP_NAME"),
-		Env:         v.GetString("APP_ENV"),
-		Port:        v.GetString("APP_PORT"),
+		Name:         v.GetString("APP_NAME"),
+		Env:          v.GetString("APP_ENV"),
+		Port:         v.GetString("APP_PORT"),
 		Debug:        v.GetBool("APP_DEBUG"),
 		ReadTimeout:  v.GetDuration("APP_READ_TIMEOUT"),
 		WriteTimeout: v.GetDuration("APP_WRITE_TIMEOUT"),

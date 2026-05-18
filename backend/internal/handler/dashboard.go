@@ -98,5 +98,5 @@ func (h *DashboardHandler) GetRecentAlerts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, out)
+	response.OK(c, "dashboard recent alerts retrieved successfully", out)
 }

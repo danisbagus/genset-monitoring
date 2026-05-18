@@ -18,8 +18,8 @@ import (
 
 type mockTelemetryService struct {
 	service.TelemetryService
-	createEngineFunc      func(ctx context.Context, input service.CreateEngineTelemetryInput) (*service.EngineTelemetryOutput, error)
-	getLatestEngineFunc   func(ctx context.Context, deviceID uuid.UUID) (*service.EngineTelemetryOutput, error)
+	createEngineFunc    func(ctx context.Context, input service.CreateEngineTelemetryInput) (*service.EngineTelemetryOutput, error)
+	getLatestEngineFunc func(ctx context.Context, deviceID uuid.UUID) (*service.EngineTelemetryOutput, error)
 }
 
 func (m *mockTelemetryService) CreateEngine(ctx context.Context, input service.CreateEngineTelemetryInput) (*service.EngineTelemetryOutput, error) {
@@ -33,7 +33,7 @@ func (m *mockTelemetryService) GetLatestEngine(ctx context.Context, deviceID uui
 func TestTelemetryHandler_CreateEngine_InvalidUUID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := NewTelemetryHandler(nil, pkgvalidator.New(), zap.NewNop())
-	
+
 	r := gin.Default()
 	r.POST("/api/v1/devices/:deviceID/engine", h.CreateEngine)
 
@@ -49,7 +49,7 @@ func TestTelemetryHandler_CreateEngine_InvalidUUID(t *testing.T) {
 func TestTelemetryHandler_CreateEngine_InvalidPayload(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := NewTelemetryHandler(nil, pkgvalidator.New(), zap.NewNop())
-	
+
 	r := gin.Default()
 	r.POST("/api/v1/devices/:deviceID/engine", h.CreateEngine)
 
@@ -67,15 +67,15 @@ func TestTelemetryHandler_CreateEngine_InvalidPayload(t *testing.T) {
 func TestTelemetryHandler_CreateEngine_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	deviceID := uuid.New()
-	
+
 	mockSvc := &mockTelemetryService{
 		createEngineFunc: func(ctx context.Context, input service.CreateEngineTelemetryInput) (*service.EngineTelemetryOutput, error) {
 			return &service.EngineTelemetryOutput{DeviceID: input.DeviceID}, nil
 		},
 	}
-	
+
 	h := NewTelemetryHandler(mockSvc, pkgvalidator.New(), zap.NewNop())
-	
+
 	r := gin.Default()
 	r.POST("/api/v1/devices/:deviceID/engine", h.CreateEngine)
 

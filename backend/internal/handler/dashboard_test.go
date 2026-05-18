@@ -166,20 +166,28 @@ func TestDashboardHandler_GetRecentAlerts_Success(t *testing.T) {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
 
-	var res service.RecentAlertsOutput
+	var res response.Response
 	if err := json.Unmarshal(w.Body.Bytes(), &res); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	if len(res.Alerts) != 1 {
-		t.Errorf("expected 1 alert, got %d", len(res.Alerts))
+	data, ok := res.Data.(map[string]interface{})
+	if !ok {
+		t.Fatalf("data response is not map[string]interface{}")
 	}
 
-	if res.Alerts[0].DeviceName != "Genset 1" {
-		t.Errorf("expected device name Genset 1, got %s", res.Alerts[0].DeviceName)
+	alerts := data["alerts"].([]interface{})
+	if len(alerts) != 1 {
+		t.Errorf("expected 1 alert, got %d", len(alerts))
 	}
 
-	if res.Pagination.Total != 1 {
-		t.Errorf("expected total 1, got %d", res.Pagination.Total)
+	alert := alerts[0].(map[string]interface{})
+	if alert["device_name"] != "Genset 1" {
+		t.Errorf("expected device name Genset 1, got %v", alert["device_name"])
+	}
+
+	pagination := data["pagination"].(map[string]interface{})
+	if int64(pagination["total"].(float64)) != 1 {
+		t.Errorf("expected total 1, got %v", pagination["total"])
 	}
 }

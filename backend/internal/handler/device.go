@@ -78,7 +78,6 @@ func (h *DeviceHandler) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-
 	out, err := h.deviceSvc.List(c.Request.Context(), service.DeviceListInput{
 		Search:  c.Query("search"),
 		Status:  c.Query("status"),

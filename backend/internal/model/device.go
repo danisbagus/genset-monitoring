@@ -1,6 +1,5 @@
 package model
 
-
 // DeviceLifecycle represents the lifecycle status of a device.
 type DeviceLifecycle string
 
@@ -27,7 +26,6 @@ type Device struct {
 
 	// Firmware
 	FirmwareVersion string `gorm:"column:firmware_version" json:"firmware_version"`
-
 
 	// Lifecycle
 	Status DeviceLifecycle `gorm:"column:status;type:device_status;default:active" json:"status"`

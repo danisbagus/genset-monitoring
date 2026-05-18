@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
@@ -71,7 +72,7 @@ func TestTelemetryService_CreateEngine_Success(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewTelemetryService(mockT, mockD, mockS, websocket.NewHub(zap.NewNop()), zap.NewNop())
+	svc := NewTelemetryService(mockT, mockD, mockS, websocket.NewHub(zap.NewNop()), pubsub.NewBroker(), zap.NewNop())
 
 	input := CreateEngineTelemetryInput{
 		DeviceID: deviceID,
@@ -93,7 +94,7 @@ func TestTelemetryService_GetLatestEngine_Success(t *testing.T) {
 			return &model.EngineTelemetry{DeviceID: id}, nil
 		},
 	}
-	svc := NewTelemetryService(mockT, nil, nil, nil, zap.NewNop())
+	svc := NewTelemetryService(mockT, nil, nil, nil, pubsub.NewBroker(), zap.NewNop())
 
 	output, err := svc.GetLatestEngine(context.Background(), deviceID)
 	if err != nil {
@@ -111,7 +112,7 @@ func TestTelemetryService_GetLatestEngine_NotFound(t *testing.T) {
 			return nil, repository.ErrTelemetryNotFound
 		},
 	}
-	svc := NewTelemetryService(mockT, nil, nil, nil, zap.NewNop())
+	svc := NewTelemetryService(mockT, nil, nil, nil, pubsub.NewBroker(), zap.NewNop())
 
 	_, err := svc.GetLatestEngine(context.Background(), deviceID)
 	if err == nil || err != ErrTelemetryNotFound {

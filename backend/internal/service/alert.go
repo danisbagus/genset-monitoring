@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -42,14 +43,16 @@ type AlertService interface {
 type alertService struct {
 	alertRepo  repository.AlertRepository
 	deviceRepo repository.DeviceRepository
+	broker     pubsub.Broker
 	log        *zap.Logger
 }
 
 // NewAlertService constructs an AlertService.
-func NewAlertService(alertRepo repository.AlertRepository, deviceRepo repository.DeviceRepository, log *zap.Logger) AlertService {
+func NewAlertService(alertRepo repository.AlertRepository, deviceRepo repository.DeviceRepository, broker pubsub.Broker, log *zap.Logger) AlertService {
 	return &alertService{
 		alertRepo:  alertRepo,
 		deviceRepo: deviceRepo,
+		broker:     broker,
 		log:        log,
 	}
 }
@@ -84,6 +87,8 @@ func (s *alertService) Create(ctx context.Context, input CreateAlertInput) (*Ale
 		zap.String("alert_id", alert.ID.String()),
 		zap.String("device_id", alert.DeviceID.String()),
 	)
+
+	s.broker.Publish(pubsub.TopicAlertCreated, alert)
 
 	return &AlertCreatedOutput{
 		AlertID: alert.ID,

@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
@@ -53,6 +54,7 @@ type deviceStatusService struct {
 	statusRepo repository.DeviceStatusRepository
 	deviceRepo repository.DeviceRepository
 	wsHub      *websocket.Hub
+	broker     pubsub.Broker
 	log        *zap.Logger
 }
 
@@ -60,12 +62,14 @@ func NewDeviceStatusService(
 	statusRepo repository.DeviceStatusRepository,
 	deviceRepo repository.DeviceRepository,
 	wsHub *websocket.Hub,
+	broker pubsub.Broker,
 	log *zap.Logger,
 ) DeviceStatusService {
 	return &deviceStatusService{
 		statusRepo: statusRepo,
 		deviceRepo: deviceRepo,
 		wsHub:      wsHub,
+		broker:     broker,
 		log:        log,
 	}
 }
@@ -161,6 +165,7 @@ func (s *deviceStatusService) Heartbeat(ctx context.Context, input HeartbeatInpu
 	}()
 
 	s.log.Debug("heartbeat processed", zap.String("device_id", input.DeviceID.String()))
+	s.broker.Publish(pubsub.TopicHeartbeatReceived, input)
 	return nil
 }
 

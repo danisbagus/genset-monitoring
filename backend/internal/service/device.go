@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/pkg/hashutil"
 )
@@ -111,13 +112,15 @@ type DeviceService interface {
 
 type deviceService struct {
 	deviceRepo repository.DeviceRepository
+	broker     pubsub.Broker
 	log        *zap.Logger
 }
 
 // NewDeviceService constructs a DeviceService.
-func NewDeviceService(deviceRepo repository.DeviceRepository, log *zap.Logger) DeviceService {
+func NewDeviceService(deviceRepo repository.DeviceRepository, broker pubsub.Broker, log *zap.Logger) DeviceService {
 	return &deviceService{
 		deviceRepo: deviceRepo,
+		broker:     broker,
 		log:        log,
 	}
 }
@@ -244,6 +247,8 @@ func (s *deviceService) Create(ctx context.Context, input CreateDeviceInput) (*D
 		zap.String("device_code", device.DeviceCode),
 	)
 
+	s.broker.Publish(pubsub.TopicDeviceCRUD, device)
+
 	return &DeviceCreatedOutput{
 		ID:          device.ID,
 		DeviceToken: rawToken,
@@ -293,6 +298,7 @@ func (s *deviceService) Update(ctx context.Context, id uuid.UUID, input UpdateDe
 		zap.String("device_id", id.String()),
 		zap.Any("fields", fields),
 	)
+	s.broker.Publish(pubsub.TopicDeviceCRUD, id)
 	return nil
 }
 
@@ -306,6 +312,7 @@ func (s *deviceService) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	s.log.Info("device soft-deleted", zap.String("device_id", id.String()))
+	s.broker.Publish(pubsub.TopicDeviceCRUD, id)
 	return nil
 }
 

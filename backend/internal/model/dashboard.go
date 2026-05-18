@@ -14,12 +14,12 @@ type DashboardSummary struct {
 
 // DeviceState represent state of a single device for dashboard
 type DeviceState struct {
-	DeviceID           string    `gorm:"column:device_id"`
-	DeviceName         string    `gorm:"column:device_name"`
-	DeviceOnline       bool      `gorm:"column:device_online"`
-	EngineRunning      bool      `gorm:"column:engine_running"`
-	FuelLevel          float64   `gorm:"column:fuel_level"`
-	CoolantTemperature float64   `gorm:"column:coolant_temperature"`
+	DeviceID           string     `gorm:"column:device_id"`
+	DeviceName         string     `gorm:"column:device_name"`
+	DeviceOnline       bool       `gorm:"column:device_online"`
+	EngineRunning      bool       `gorm:"column:engine_running"`
+	FuelLevel          float64    `gorm:"column:fuel_level"`
+	CoolantTemperature float64    `gorm:"column:coolant_temperature"`
 	LastSeenAt         *time.Time `gorm:"column:last_seen_at"`
 }
 

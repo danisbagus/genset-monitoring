@@ -36,6 +36,7 @@ import (
 	inframqtt "github.com/danisbagus/genset-monitoring/backend/internal/infrastructure/mqtt"
 	infraredis "github.com/danisbagus/genset-monitoring/backend/internal/infrastructure/redis"
 	"github.com/danisbagus/genset-monitoring/backend/internal/middleware"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/internal/service"
 	ws "github.com/danisbagus/genset-monitoring/backend/internal/websocket"
@@ -96,6 +97,14 @@ func main() {
 	// ─── WebSocket Hub ────────────────────────────────────────────────────────
 	wsHub := ws.NewHub(log)
 
+	// ─── Event Broker (Pub/Sub) ────────────────────────────────────────────────
+	eventBroker := pubsub.NewBroker()
+	defer eventBroker.Close()
+
+	// ─── Background Context ────────────────────────────────────────────────────
+	bgCtx, bgCancel := context.WithCancel(context.Background())
+	defer bgCancel()
+
 	// ─── JWT Manager ──────────────────────────────────────────────────────────
 	jwtManager := jwtutil.NewManager(cfg.JWT.Secret, cfg.JWT.Expiration)
 
@@ -114,11 +123,15 @@ func main() {
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
 	authSvc := service.NewAuthService(userRepo, tokenRepo, jwtManager, cfg.JWT.RefreshExpiration, log)
-	deviceSvc := service.NewDeviceService(deviceRepo, log)
-	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, wsHub, log)
-	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, log)
+	deviceSvc := service.NewDeviceService(deviceRepo, eventBroker, log)
+	statusSvc := service.NewDeviceStatusService(statusRepo, deviceRepo, wsHub, eventBroker, log)
+	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, eventBroker, log)
 	dashboardSvc := service.NewDashboardService(dashboardRepo, log)
-	alertSvc := service.NewAlertService(alertRepo, deviceRepo, log)
+	alertSvc := service.NewAlertService(alertRepo, deviceRepo, eventBroker, log)
+
+	// ─── WebSocket Summary Broadcaster ─────────────────────────────────────────
+	summaryBroadcaster := service.NewSummaryBroadcaster(eventBroker, dashboardSvc, wsHub, log)
+	summaryBroadcaster.Start(bgCtx)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
@@ -228,6 +241,7 @@ func main() {
 	<-quit
 
 	log.Info("shutdown signal received, draining connections...")
+	bgCancel() // stop background workers
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

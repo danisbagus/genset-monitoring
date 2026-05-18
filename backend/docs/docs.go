@@ -1483,6 +1483,9 @@ const docTemplate = `{
                 "total_devices": {
                     "type": "integer"
                 },
+                "updated_at": {
+                    "type": "string"
+                },
                 "warning_alerts": {
                     "type": "integer"
                 }

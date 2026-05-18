@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/danisbagus/genset-monitoring/backend/internal/pubsub"
 	"github.com/danisbagus/genset-monitoring/backend/internal/repository"
 	"github.com/danisbagus/genset-monitoring/backend/internal/websocket"
 )
@@ -148,6 +149,7 @@ type telemetryService struct {
 	deviceRepo    repository.DeviceRepository
 	statusRepo    repository.DeviceStatusRepository
 	wsHub         *websocket.Hub
+	broker        pubsub.Broker
 	log           *zap.Logger
 }
 
@@ -156,6 +158,7 @@ func NewTelemetryService(
 	deviceRepo repository.DeviceRepository,
 	statusRepo repository.DeviceStatusRepository,
 	wsHub *websocket.Hub,
+	broker pubsub.Broker,
 	log *zap.Logger,
 ) TelemetryService {
 	return &telemetryService{
@@ -163,6 +166,7 @@ func NewTelemetryService(
 		deviceRepo:    deviceRepo,
 		statusRepo:    statusRepo,
 		wsHub:         wsHub,
+		broker:        broker,
 		log:           log,
 	}
 }
@@ -236,6 +240,8 @@ func (s *telemetryService) CreateEngine(ctx context.Context, input CreateEngineT
 		s.log.Info("Engine telemetry broadcasted via websocket",
 			zap.String("device_id", input.DeviceID.String()))
 	}()
+
+	s.broker.Publish(pubsub.TopicTelemetryEngineCreated, output)
 
 	return output, nil
 }
