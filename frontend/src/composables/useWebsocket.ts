@@ -1,34 +1,53 @@
 import { ref, onUnmounted } from 'vue'
 import { API_CONFIG } from '@/config/api.config'
 
+export type WsStatus = 'online' | 'reconnecting' | 'offline'
+
+/**
+ * Robust WebSocket composable with automatic reconnection and listener registry.
+ */
 export function useWebsocket(url?: string) {
   const socket = ref<WebSocket | null>(null)
   const isConnected = ref(false)
+  const status = ref<WsStatus>('offline')
   const error = ref<Event | null>(null)
   
   // Construct WS URL: works with relative paths by using current host/protocol
   const getWsUrl = () => {
-    if (url) return url
-    if (API_CONFIG.WS_URL.startsWith('ws')) return API_CONFIG.WS_URL
+    const targetUrl = url || API_CONFIG.WS_URL
+    if (targetUrl.startsWith('ws://') || targetUrl.startsWith('wss://')) {
+      return targetUrl
+    }
     
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
-    return `${protocol}//${host}${API_CONFIG.WS_URL}`
+    const path = targetUrl.startsWith('/') ? targetUrl : `/${targetUrl}`
+    return `${protocol}//${host}${path}`
   }
 
   const wsUrl = getWsUrl()
   let reconnectTimer: number | null = null
   const reconnectInterval = 5000
+  let isExplicitlyClosed = false
+
+  const messageListeners = new Set<(data: any) => void>()
 
   function connect() {
-    if (socket.value?.readyState === WebSocket.OPEN) return
+    // If already connected or connecting, do not open a new connection
+    if (socket.value && (socket.value.readyState === WebSocket.OPEN || socket.value.readyState === WebSocket.CONNECTING)) {
+      return
+    }
+
+    isExplicitlyClosed = false
+    status.value = reconnectTimer ? 'reconnecting' : 'offline'
 
     try {
       socket.value = new WebSocket(wsUrl)
 
       socket.value.onopen = () => {
-        console.log('WS Connected')
+        console.log('WS Connected to:', wsUrl)
         isConnected.value = true
+        status.value = 'online'
         error.value = null
         if (reconnectTimer) {
           clearTimeout(reconnectTimer)
@@ -37,18 +56,39 @@ export function useWebsocket(url?: string) {
       }
 
       socket.value.onclose = () => {
-        console.log('WS Disconnected')
+        console.log('WS Disconnected from:', wsUrl)
         isConnected.value = false
-        scheduleReconnect()
+        
+        if (!isExplicitlyClosed) {
+          status.value = 'reconnecting'
+          scheduleReconnect()
+        } else {
+          status.value = 'offline'
+        }
       }
 
       socket.value.onerror = (e) => {
         console.error('WS Error:', e)
         error.value = e
       }
+
+      socket.value.onmessage = (event) => {
+        try {
+          const parsed = JSON.parse(event.data)
+          messageListeners.forEach((listener) => listener(parsed))
+        } catch (e) {
+          messageListeners.forEach((listener) => listener(event.data))
+        }
+      }
     } catch (e) {
       console.error('WS Connection Error:', e)
-      scheduleReconnect()
+      isConnected.value = false
+      if (!isExplicitlyClosed) {
+        status.value = 'reconnecting'
+        scheduleReconnect()
+      } else {
+        status.value = 'offline'
+      }
     }
   }
 
@@ -61,14 +101,21 @@ export function useWebsocket(url?: string) {
   }
 
   function disconnect() {
+    isExplicitlyClosed = true
     if (reconnectTimer) {
       clearTimeout(reconnectTimer)
       reconnectTimer = null
     }
     if (socket.value) {
+      socket.value.onopen = null
+      socket.value.onclose = null
+      socket.value.onerror = null
+      socket.value.onmessage = null
       socket.value.close()
       socket.value = null
     }
+    isConnected.value = false
+    status.value = 'offline'
   }
 
   function sendMessage(data: any) {
@@ -80,17 +127,10 @@ export function useWebsocket(url?: string) {
   }
 
   function onMessage(callback: (data: any) => void) {
-    if (!socket.value) return
-    
-    // We wrap the existing onmessage or use addEventListener
-    socket.value.addEventListener('message', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        callback(data)
-      } catch (e) {
-        callback(event.data)
-      }
-    })
+    messageListeners.add(callback)
+    return () => {
+      messageListeners.delete(callback)
+    }
   }
 
   onUnmounted(() => {
@@ -100,6 +140,7 @@ export function useWebsocket(url?: string) {
   return {
     socket,
     isConnected,
+    status,
     error,
     connect,
     disconnect,

@@ -10,6 +10,10 @@ defineProps<{
   loading?: boolean
 }>()
 
+const emit = defineEmits<{
+  (e: 'change-page', page: number): void
+}>()
+
 const formatRelativeTime = (dateStr: string) => {
   if (!dateStr) return '-'
   return useTimeAgo(new Date(dateStr))
@@ -167,13 +171,15 @@ const formatRelativeTime = (dateStr: string) => {
         <div class="flex space-x-2">
           <button 
             class="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors" 
-            :disabled="pagination.page === 1"
+            :disabled="pagination.page === 1 || loading"
+            @click="emit('change-page', pagination.page - 1)"
           >
             Previous
           </button>
           <button 
             class="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors" 
-            :disabled="pagination.page * pagination.limit >= pagination.total"
+            :disabled="pagination.page * pagination.limit >= pagination.total || loading"
+            @click="emit('change-page', pagination.page + 1)"
           >
             Next
           </button>

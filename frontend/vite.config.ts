@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
           ws: true,
           changeOrigin: true,
           secure: false,
+          rewrite: (path) => path.replace(/^\/ws/, '/api/v1/ws'),
         },
       },
     },

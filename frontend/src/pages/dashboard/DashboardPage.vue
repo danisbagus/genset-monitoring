@@ -1,143 +1,118 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useTimeAgo, useTimestamp } from '@vueuse/core'
+import { ref, onMounted, onUnmounted } from 'vue'
 import SummaryCards from '../../components/SummaryCards.vue'
 import DeviceStatusTable from '../../components/DeviceStatusTable.vue'
 import LatestAlertsTable from '../../components/LatestAlertsTable.vue'
+import BaseErrorMessage from '../../components/BaseErrorMessage.vue'
+import { dashboardApi } from '../../services/api/dashboard.api'
 import type { DashboardSummary, DeviceStatus, Alert, Pagination } from '../../types/dashboard'
+import { useWebsocket } from '../../composables/useWebsocket'
+import { useRelativeTime } from '../../composables/useRelativeTime'
 
 // WebSocket & Update Status
-const wsStatus = ref<'online' | 'reconnecting' | 'offline'>('online')
-const lastUpdate = ref(new Date())
-const lastUpdateText = useTimeAgo(lastUpdate)
+const { status: wsStatus, connect: connectWs, onMessage } = useWebsocket()
+const updated_at = ref<Date>(new Date())
+const { relativeText: lastUpdateText } = useRelativeTime(updated_at)
 
-// Dummy Data Initialization
+// Data State
 const summaryData = ref<DashboardSummary>({
-  critical_alerts: 2,
-  offline_devices: 1,
-  online_devices: 4,
-  running_engines: 3,
-  total_devices: 5,
-  warning_alerts: 5
+  critical_alerts: 0,
+  offline_devices: 0,
+  online_devices: 0,
+  running_engines: 0,
+  total_devices: 0,
+  warning_alerts: 0
 })
 
-const deviceData = ref<DeviceStatus[]>([
-  {
-    device_id: "GS-001",
-    device_name: "Genset Alpha-1",
-    device_online: true,
-    engine_running: true,
-    fuel_level: 85,
-    coolant_temperature: 78,
-    last_seen_at: new Date().toISOString()
-  },
-  {
-    device_id: "GS-002",
-    device_name: "Genset Bravo-2",
-    device_online: true,
-    engine_running: false,
-    fuel_level: 64,
-    coolant_temperature: 42,
-    last_seen_at: new Date().toISOString()
-  },
-  {
-    device_id: "GS-003",
-    device_name: "Genset Gamma-3",
-    device_online: false,
-    engine_running: false,
-    fuel_level: 12,
-    coolant_temperature: 25,
-    last_seen_at: new Date(Date.now() - 3600000).toISOString()
-  },
-  {
-    device_id: "GS-004",
-    device_name: "Genset Delta-4",
-    device_online: true,
-    engine_running: true,
-    fuel_level: 92,
-    coolant_temperature: 95,
-    last_seen_at: new Date().toISOString()
-  },
-  {
-    device_id: "GS-005",
-    device_name: "Genset Epsilon-5",
-    device_online: true,
-    engine_running: true,
-    fuel_level: 45,
-    coolant_temperature: 82,
-    last_seen_at: new Date().toISOString()
-  }
-])
-
-const alertData = ref<Alert[]>([
-  {
-    alert_id: "AL-101",
-    device_id: "GS-004",
-    device_name: "Genset Delta-4",
-    severity: "critical",
-    message: "High Coolant Temperature detected (95°C)",
-    acknowledged: false,
-    created_at: new Date(Date.now() - 600000).toISOString()
-  },
-  {
-    alert_id: "AL-102",
-    device_id: "GS-003",
-    device_name: "Genset Gamma-3",
-    severity: "warning",
-    message: "Low Fuel Level (12%)",
-    acknowledged: true,
-    created_at: new Date(Date.now() - 1800000).toISOString()
-  },
-  {
-    alert_id: "AL-103",
-    device_id: "GS-001",
-    device_name: "Genset Alpha-1",
-    severity: "info",
-    message: "Scheduled maintenance in 24 hours",
-    acknowledged: false,
-    created_at: new Date(Date.now() - 3600000).toISOString()
-  }
-])
+const deviceData = ref<DeviceStatus[]>([])
+const alertData = ref<Alert[]>([])
 
 const devicePagination = ref<Pagination>({
   limit: 10,
   page: 1,
-  total: 5
+  total: 0
 })
 
 const alertPagination = ref<Pagination>({
   limit: 10,
   page: 1,
-  total: 3
+  total: 0
 })
 
 const isLoading = ref(false)
+const error = ref<string | null>(null)
 
-const refreshData = () => {
-  lastUpdate.value = new Date()
-  // Simulate data update
-  if (deviceData.value[0]) {
-    deviceData.value[0].last_seen_at = new Date().toISOString()
+const fetchData = async () => {
+  // If only changing pages, we might not want to set global isLoading to true 
+  // but let's keep it simple for now as the components handle their own loading props
+  isLoading.value = true
+  error.value = null
+  
+  try {
+    const [summary, devicesResponse, alertsResponse] = await Promise.all([
+      dashboardApi.getSummary(),
+      dashboardApi.getDeviceStates(devicePagination.value.page, devicePagination.value.limit),
+      dashboardApi.getRecentAlerts(alertPagination.value.page, alertPagination.value.limit)
+    ])
+
+    summaryData.value = summary
+    console.log("devicesResponse", devicesResponse)
+    console.log("alertsResponse", alertsResponse)
+    deviceData.value = devicesResponse.devices
+    devicePagination.value = devicesResponse.pagination
+    
+    alertData.value = alertsResponse.alerts
+    alertPagination.value = alertsResponse.pagination
+    
+    // API /summary was successfully called; update updated_at
+    updated_at.value = new Date()
+  } catch (err: any) {
+    console.error('Failed to fetch dashboard data:', err)
+    error.value = 'Failed to load dashboard data. Please try again later.'
+  } finally {
+    isLoading.value = false
   }
 }
 
+// Listen to WebSocket messages and register the cleanup callback
+const unsubscribeWs = onMessage((message: any) => {
+  if (message && message.event === 'dashboard.summary.updated' && message.data) {
+    summaryData.value = message.data
+    
+    // Update the last updated time using the timestamp from the WS message
+    const wsTimestamp = message.timestamp || message.ts
+    if (wsTimestamp) {
+      updated_at.value = new Date(wsTimestamp)
+    } else {
+      updated_at.value = new Date()
+    }
+  }
+})
+
+const handleDevicePageChange = (page: number) => {
+  devicePagination.value.page = page
+  fetchData()
+}
+
+const handleAlertPageChange = (page: number) => {
+  alertPagination.value.page = page
+  fetchData()
+}
+
+const refreshData = () => {
+  fetchData()
+}
+
 onMounted(() => {
-  // Simulate initial loading
-  isLoading.value = true
-  setTimeout(() => {
-    isLoading.value = false
-    refreshData()
-  }, 800)
+  fetchData()
+  connectWs()
+})
 
-  // Simulate periodic WebSocket updates
-  setInterval(() => {
-    refreshData()
-  }, 10000)
-
-  // Simulate random WS status changes for demo
-  setTimeout(() => {
-    // wsStatus.value = 'reconnecting'
-  }, 15000)
+// Clean up websocket listener when component is unmounted
+onUnmounted(() => {
+  if (unsubscribeWs) {
+    unsubscribeWs()
+  }
 })
 </script>
 
@@ -157,7 +132,7 @@ onMounted(() => {
           <p class="text-sm text-slate-500 dark:text-slate-400">Real-time status of your genset fleet</p>
           <div class="hidden sm:flex items-center gap-2">
             <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-            <p class="text-xs font-medium text-slate-400 dark:text-slate-500 italic">Last updated {{ lastUpdateText }}</p>
+            <p class="text-xs font-medium text-slate-400 dark:text-slate-500 italic">{{ lastUpdateText }}</p>
           </div>
         </div>
       </div>
@@ -212,18 +187,26 @@ onMounted(() => {
     </header>
 
     <!-- 1. Summary Cards Section -->
-    <section>
+    <section v-if="!error">
       <SummaryCards :summary="summaryData" />
     </section>
 
+    <!-- Error State -->
+    <BaseErrorMessage 
+      v-if="error" 
+      :message="error" 
+      @retry="fetchData" 
+    />
+
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+    <div v-if="!error" class="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
       <!-- 2. Device Status Table Section -->
       <section>
         <DeviceStatusTable 
           :devices="deviceData" 
           :pagination="devicePagination" 
           :loading="isLoading" 
+          @change-page="handleDevicePageChange"
         />
       </section>
 
@@ -233,6 +216,7 @@ onMounted(() => {
           :alerts="alertData" 
           :pagination="alertPagination" 
           :loading="isLoading" 
+          @change-page="handleAlertPageChange"
         />
       </section>
     </div>

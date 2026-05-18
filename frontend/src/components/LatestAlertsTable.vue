@@ -18,6 +18,10 @@ const getSeverityVariant = (severity: string) => {
   }
 }
 
+const emit = defineEmits<{
+  (e: 'change-page', page: number): void
+}>()
+
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleString()
@@ -127,10 +131,23 @@ const formatDate = (dateStr: string) => {
 
     <template #footer>
       <div class="flex items-center justify-between">
-        <span class="text-xs sm:text-sm text-slate-500 font-medium">Showing {{ alerts.length }} latest alerts</span>
-        <button class="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-          View All History
-        </button>
+        <span class="text-xs sm:text-sm text-slate-500 font-medium">Showing {{ alerts.length }} of {{ pagination.total }} alerts</span>
+        <div class="flex space-x-2">
+          <button 
+            class="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors" 
+            :disabled="pagination.page === 1 || loading"
+            @click="emit('change-page', pagination.page - 1)"
+          >
+            Previous
+          </button>
+          <button 
+            class="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors" 
+            :disabled="pagination.page * pagination.limit >= pagination.total || loading"
+            @click="emit('change-page', pagination.page + 1)"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </template>
   </BaseCard>

@@ -61,7 +61,7 @@ const stats = computed(() => [
 
 <template>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6">
-    <BaseCard v-for="(stat, index) in stats" :key="stat.title" class="!p-5 hover:-translate-y-1 transition-all duration-300 group">
+    <BaseCard v-for="stat in stats" :key="stat.title" class="!p-5 hover:-translate-y-1 transition-all duration-300 group">
       <div class="flex items-center justify-between mb-4">
         <div :class="['p-2.5 rounded-xl transition-colors duration-300', stat.bg, stat.text]">
           <!-- Icons mapping -->

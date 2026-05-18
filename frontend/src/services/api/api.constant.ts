@@ -27,4 +27,9 @@ export const API_ENDPOINTS = {
     ELECTRICAL_CREATE: (id: string) => `/v1/devices/${id}/electrical`,
     ELECTRICAL_LATEST: (id: string) => `/v1/devices/${id}/electrical/latest`,
   },
+  DASHBOARD: {
+    SUMMARY: '/v1/dashboard/summary',
+    DEVICE_STATES: '/v1/dashboard/device-states',
+    RECENT_ALERTS: '/v1/dashboard/recent-alerts',
+  },
 } as const
