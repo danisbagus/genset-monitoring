@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SummaryCards from '../../components/SummaryCards.vue'
 import DeviceStatusTable from '../../components/DeviceStatusTable.vue'
-import LatestAlertsTable from '../../components/LatestAlertsTable.vue'
+import LatestAlertsCardList from '../../components/LatestAlertsCardList.vue'
 import BaseErrorMessage from '../../components/BaseErrorMessage.vue'
 import { dashboardApi } from '../../services/api/dashboard.api'
 import type { DashboardSummary, DeviceStatus, Alert, Pagination } from '../../types/dashboard'
@@ -199,9 +199,9 @@ onUnmounted(() => {
     />
 
     <!-- Main Content Grid -->
-    <div v-if="!error" class="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+    <div v-if="!error" class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
       <!-- 2. Device Status Table Section -->
-      <section>
+      <section class="lg:col-span-2">
         <DeviceStatusTable 
           :devices="deviceData" 
           :pagination="devicePagination" 
@@ -210,9 +210,9 @@ onUnmounted(() => {
         />
       </section>
 
-      <!-- 3. Latest Alerts Table Section -->
-      <section>
-        <LatestAlertsTable 
+      <!-- 3. Latest Alerts Card List Section -->
+      <section class="lg:col-span-1">
+        <LatestAlertsCardList 
           :alerts="alertData" 
           :pagination="alertPagination" 
           :loading="isLoading" 
