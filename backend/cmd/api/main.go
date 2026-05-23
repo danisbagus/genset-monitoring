@@ -137,6 +137,10 @@ func main() {
 	deviceStatusBroadcaster := service.NewDeviceStatusBroadcaster(eventBroker, dashboardRepo, wsHub, log)
 	deviceStatusBroadcaster.Start(bgCtx)
 
+	// ─── WebSocket Alert Broadcaster ───────────────────────────────────────────
+	alertBroadcaster := service.NewAlertBroadcaster(eventBroker, deviceRepo, wsHub, log)
+	alertBroadcaster.Start(bgCtx)
+
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	healthHandler := handler.NewHealthHandler(healthSvc)
 	authHandler := handler.NewAuthHandler(authSvc, v, log)

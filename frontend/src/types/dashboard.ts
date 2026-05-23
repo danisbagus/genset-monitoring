@@ -26,6 +26,7 @@ export interface Alert {
   device_name: string
   message: string
   severity: 'critical' | 'warning' | 'info' | string
+  isHighlighted?: boolean
 }
 
 export interface Pagination {

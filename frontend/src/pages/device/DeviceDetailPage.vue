@@ -1,9 +1,24 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import LatestAlertsCardList from '../../components/LatestAlertsCardList.vue'
+import { useWebsocket } from '../../composables/useWebsocket'
+import type { Alert, Pagination } from '../../types/dashboard'
 
 const route = useRoute()
-const deviceId = route.params.id
+const deviceId = route.params.id as string
 
+// ── WebSocket payload type for dashboard.alert.created ─────────────────────
+interface AlertCreatedPayload {
+  alert_id: string
+  device_id: string
+  device_name: string
+  severity: 'critical' | 'warning' | 'info' | string
+  acknowledged: boolean
+  event_time: string
+}
+
+// ── Static telemetry / engine mock data (to be replaced with API later) ────
 const telemetry = [
   { label: 'Voltage L1-N', value: '230.5 V', status: 'normal' },
   { label: 'Voltage L2-N', value: '231.2 V', status: 'normal' },
@@ -21,6 +36,96 @@ const engineStats = [
   { label: 'Battery', value: '24.2 V', icon: '🔋' },
   { label: 'Engine Speed', value: '1500 RPM', icon: '🔄' },
 ]
+
+// ── Alert state ─────────────────────────────────────────────────────────────
+const alertData = ref<Alert[]>([])
+const alertPagination = ref<Pagination>({ limit: 10, page: 1, total: 0 })
+
+// ── WebSocket setup ──────────────────────────────────────────────────────────
+const { connect: connectWs, onMessage } = useWebsocket()
+
+// Track pending highlight timeouts for cleanup
+const highlightTimeouts = new Map<string, number>()
+
+/**
+ * Handles incoming dashboard.alert.created payload.
+ * - Ignores alerts from other devices.
+ * - Skips duplicates (idempotent insert).
+ * - Inserts new alert at the top with isHighlighted = true.
+ * - Removes highlight flag after HIGHLIGHT_DURATION_MS.
+ */
+const HIGHLIGHT_DURATION_MS = 4000
+
+const handleAlertCreated = (payload: AlertCreatedPayload) => {
+  if (!payload?.alert_id) return
+
+  // Filter: only process alerts belonging to this device
+  if (payload.device_id !== deviceId) return
+
+  // Idempotent: skip if alert already in the list
+  if (alertData.value.some(a => a.alert_id === payload.alert_id)) return
+
+  const severity = payload.severity || 'info'
+  const severityLabel = severity.charAt(0).toUpperCase() + severity.slice(1)
+
+  const newAlert: Alert = {
+    alert_id: payload.alert_id,
+    device_id: payload.device_id,
+    device_name: payload.device_name,
+    severity,
+    acknowledged: payload.acknowledged ?? false,
+    // WS payload uses event_time; map to Alert.created_at
+    created_at: payload.event_time || new Date().toISOString(),
+    // Generate a human-readable message since payload has no message field
+    message: `${severityLabel} alert detected on ${payload.device_name}`,
+    isHighlighted: true,
+  }
+
+  // Insert at top
+  alertData.value.unshift(newAlert)
+  alertPagination.value.total += 1
+
+  // Keep list within page limit to avoid unbounded growth
+  if (alertData.value.length > alertPagination.value.limit) {
+    alertData.value = alertData.value.slice(0, alertPagination.value.limit)
+  }
+
+  // Schedule highlight removal — cancel any previous timer for same alert_id
+  if (highlightTimeouts.has(payload.alert_id)) {
+    clearTimeout(highlightTimeouts.get(payload.alert_id))
+  }
+
+  const timerId = window.setTimeout(() => {
+    const idx = alertData.value.findIndex(a => a.alert_id === payload.alert_id)
+    if (idx !== -1) {
+      // Reactive splice to trigger Vue's reactivity
+      alertData.value.splice(idx, 1, { ...alertData.value[idx], isHighlighted: false })
+    }
+    highlightTimeouts.delete(payload.alert_id)
+  }, HIGHLIGHT_DURATION_MS)
+
+  highlightTimeouts.set(payload.alert_id, timerId)
+}
+
+// Register WS message listener; returns an unsubscribe function
+const unsubscribeWs = onMessage((message: any) => {
+  if (!message) return
+  if (message.event === 'dashboard.alert.created' && message.data) {
+    handleAlertCreated(message.data as AlertCreatedPayload)
+  }
+})
+
+onMounted(() => {
+  connectWs()
+})
+
+onUnmounted(() => {
+  // Clean up WS listener
+  if (unsubscribeWs) unsubscribeWs()
+  // Clear any pending highlight timeouts
+  highlightTimeouts.forEach((id) => clearTimeout(id))
+  highlightTimeouts.clear()
+})
 </script>
 
 <template>
@@ -168,5 +273,14 @@ const engineStats = [
         </div>
       </div>
     </div>
+
+    <!-- Latest Alerts Section ──────────────────────────────────────────── -->
+    <section>
+      <LatestAlertsCardList
+        :alerts="alertData"
+        :pagination="alertPagination"
+        :loading="false"
+      />
+    </section>
   </div>
 </template>

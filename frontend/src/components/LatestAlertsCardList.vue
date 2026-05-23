@@ -116,9 +116,12 @@ const getAlertTitleAndDesc = (alert: Alert) => {
           :key="alert.alert_id"
           class="relative flex flex-col p-4 bg-white dark:bg-slate-900 border-l-4 rounded-r-xl border-y border-r border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 gap-3 group cursor-pointer hover:-translate-y-0.5"
           :class="{
-            'border-l-rose-500 hover:border-l-rose-600 bg-rose-50/5 dark:bg-rose-950/5': alert.severity === 'critical',
-            'border-l-amber-500 hover:border-l-amber-600 bg-amber-50/5 dark:bg-amber-950/5': alert.severity === 'warning',
-            'border-l-blue-500 hover:border-l-blue-600 bg-blue-50/5 dark:bg-blue-950/5': alert.severity === 'info'
+            'border-l-rose-500 hover:border-l-rose-600 bg-rose-50/5 dark:bg-rose-950/5': alert.severity === 'critical' && !alert.isHighlighted,
+            'border-l-amber-500 hover:border-l-amber-600 bg-amber-50/5 dark:bg-amber-950/5': alert.severity === 'warning' && !alert.isHighlighted,
+            'border-l-blue-500 hover:border-l-blue-600 bg-blue-50/5 dark:bg-blue-950/5': alert.severity === 'info' && !alert.isHighlighted,
+            'alert-highlight-critical': alert.isHighlighted && alert.severity === 'critical',
+            'alert-highlight-warning': alert.isHighlighted && alert.severity === 'warning',
+            'alert-highlight-info': alert.isHighlighted && alert.severity === 'info'
           }"
         >
           <!-- Card Header: Title/Type and Severity Badge -->
@@ -249,5 +252,38 @@ const getAlertTitleAndDesc = (alert: Alert) => {
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
+}
+
+/* ── Alert Highlight Animations ───────────────────────────────────────── */
+@keyframes alert-pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.4), 0 4px 16px rgba(244, 63, 94, 0.15); }
+  50%       { box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.65), 0 8px 28px rgba(244, 63, 94, 0.35); }
+}
+@keyframes alert-pulse-warning {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4), 0 4px 16px rgba(245, 158, 11, 0.15); }
+  50%       { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.65), 0 8px 28px rgba(245, 158, 11, 0.35); }
+}
+@keyframes alert-pulse-info {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4), 0 4px 16px rgba(59, 130, 246, 0.15); }
+  50%       { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.65), 0 8px 28px rgba(59, 130, 246, 0.35); }
+}
+
+.alert-highlight-critical {
+  border-left-color: rgb(244, 63, 94) !important;
+  background-color: rgba(244, 63, 94, 0.06) !important;
+  animation: alert-pulse-critical 1.2s ease-in-out 2;
+  transform: translateY(-1px);
+}
+.alert-highlight-warning {
+  border-left-color: rgb(245, 158, 11) !important;
+  background-color: rgba(245, 158, 11, 0.06) !important;
+  animation: alert-pulse-warning 1.2s ease-in-out 2;
+  transform: translateY(-1px);
+}
+.alert-highlight-info {
+  border-left-color: rgb(59, 130, 246) !important;
+  background-color: rgba(59, 130, 246, 0.06) !important;
+  animation: alert-pulse-info 1.2s ease-in-out 2;
+  transform: translateY(-1px);
 }
 </style>

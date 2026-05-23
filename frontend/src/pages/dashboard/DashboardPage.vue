@@ -75,6 +75,7 @@ const fetchData = async () => {
 }
 
 const highlightTimeouts = new Map<string, number>()
+const alertHighlightTimeouts = new Map<string, number>()
 
 const handleDeviceUpdate = (updatedDevice: any) => {
   console.log("updatedDevice", updatedDevice)
@@ -134,6 +135,58 @@ const handleDeviceUpdate = (updatedDevice: any) => {
   updated_at.value = new Date()
 }
 
+// ── dashboard.alert.created handler ───────────────────────────────────────────
+const ALERT_HIGHLIGHT_DURATION_MS = 4000
+
+const handleAlertCreated = (payload: any) => {
+  if (!payload?.alert_id) return
+
+  // Idempotent: skip if alert already in the list
+  if (alertData.value.some(a => a.alert_id === payload.alert_id)) return
+
+  const severity = payload.severity || 'info'
+  const severityLabel = severity.charAt(0).toUpperCase() + severity.slice(1)
+
+  const newAlert: Alert = {
+    alert_id: payload.alert_id,
+    device_id: payload.device_id,
+    device_name: payload.device_name,
+    severity,
+    acknowledged: payload.acknowledged ?? false,
+    // WS payload uses event_time; map to Alert.created_at
+    created_at: payload.event_time || new Date().toISOString(),
+    // Generate a readable message since the WS payload has no message field
+    message: `${severityLabel} alert detected on ${payload.device_name}`,
+    isHighlighted: true,
+  }
+
+  // Insert new alert at the top of the list
+  alertData.value.unshift(newAlert)
+  alertPagination.value.total += 1
+
+  // Keep list bounded to current page limit
+  if (alertData.value.length > alertPagination.value.limit) {
+    alertData.value = alertData.value.slice(0, alertPagination.value.limit)
+  }
+
+  // Schedule highlight removal — cancel any stale timer for this alert_id
+  if (alertHighlightTimeouts.has(payload.alert_id)) {
+    clearTimeout(alertHighlightTimeouts.get(payload.alert_id))
+  }
+
+  const timerId = window.setTimeout(() => {
+    const idx = alertData.value.findIndex(a => a.alert_id === payload.alert_id)
+    if (idx !== -1) {
+      // Use reactive splice so Vue detects the nested field change
+      alertData.value.splice(idx, 1, { ...alertData.value[idx], isHighlighted: false })
+    }
+    alertHighlightTimeouts.delete(payload.alert_id)
+  }, ALERT_HIGHLIGHT_DURATION_MS)
+
+  alertHighlightTimeouts.set(payload.alert_id, timerId)
+  updated_at.value = new Date()
+}
+
 // Listen to WebSocket messages and register the cleanup callback
 const unsubscribeWs = onMessage((message: any) => {
   if (!message) return
@@ -150,6 +203,8 @@ const unsubscribeWs = onMessage((message: any) => {
     }
   } else if (message.event === 'dashboard.devices.updated' && message.data) {
     handleDeviceUpdate(message.data)
+  } else if (message.event === 'dashboard.alert.created' && message.data) {
+    handleAlertCreated(message.data)
   }
 })
 
@@ -179,6 +234,8 @@ onUnmounted(() => {
   }
   highlightTimeouts.forEach((timeoutId) => clearTimeout(timeoutId))
   highlightTimeouts.clear()
+  alertHighlightTimeouts.forEach((timeoutId) => clearTimeout(timeoutId))
+  alertHighlightTimeouts.clear()
 })
 </script>
 
