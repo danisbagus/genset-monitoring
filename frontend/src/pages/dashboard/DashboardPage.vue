@@ -74,9 +74,71 @@ const fetchData = async () => {
   }
 }
 
+const highlightTimeouts = new Map<string, number>()
+
+const handleDeviceUpdate = (updatedDevice: any) => {
+  console.log("updatedDevice", updatedDevice)
+  if (!updatedDevice) return
+
+  const idToMatch = updatedDevice.device_id
+  const nameToMatch = updatedDevice.device_name
+
+  let index = -1
+  if (idToMatch) {
+    index = deviceData.value.findIndex(d => d.device_id === idToMatch)
+  } else if (nameToMatch) {
+    index = deviceData.value.findIndex(d => d.device_name === nameToMatch)
+  }
+
+  const deviceId = idToMatch || updatedDevice.device_name || `unknown-${Date.now()}`
+  const finalDevice: DeviceStatus = {
+    device_id: deviceId,
+    device_name: updatedDevice.device_name || 'Unknown Device',
+    device_online: updatedDevice.device_online ?? false,
+    engine_running: updatedDevice.engine_running ?? false,
+    fuel_level: updatedDevice.fuel_level ?? 0,
+    coolant_temperature: updatedDevice.coolant_temperature ?? 0,
+    last_seen_at: updatedDevice.last_seen_at || new Date().toISOString(),
+    isHighlighted: true
+  }
+
+  if (index !== -1) {
+    deviceData.value.splice(index, 1, {
+      ...deviceData.value[index],
+      ...finalDevice,
+      device_id: deviceData.value[index].device_id
+    })
+  } else {
+    deviceData.value.unshift(finalDevice)
+    devicePagination.value.total += 1
+
+    if (deviceData.value.length > devicePagination.value.limit) {
+      deviceData.value = deviceData.value.slice(0, devicePagination.value.limit)
+    }
+  }
+
+  const targetId = finalDevice.device_id
+  if (highlightTimeouts.has(targetId)) {
+    clearTimeout(highlightTimeouts.get(targetId))
+  }
+
+  const timeoutId = window.setTimeout(() => {
+    const idx = deviceData.value.findIndex(d => d.device_id === targetId)
+    if (idx !== -1) {
+      deviceData.value[idx].isHighlighted = false
+    }
+    highlightTimeouts.delete(targetId)
+  }, 3000)
+
+  highlightTimeouts.set(targetId, timeoutId)
+  updated_at.value = new Date()
+}
+
 // Listen to WebSocket messages and register the cleanup callback
 const unsubscribeWs = onMessage((message: any) => {
-  if (message && message.event === 'dashboard.summary.updated' && message.data) {
+  if (!message) return
+
+  if (message.event === 'dashboard.summary.updated' && message.data) {
     summaryData.value = message.data
     
     // Update the last updated time using the timestamp from the WS message
@@ -86,6 +148,8 @@ const unsubscribeWs = onMessage((message: any) => {
     } else {
       updated_at.value = new Date()
     }
+  } else if (message.event === 'dashboard.devices.updated' && message.data) {
+    handleDeviceUpdate(message.data)
   }
 })
 
@@ -113,6 +177,8 @@ onUnmounted(() => {
   if (unsubscribeWs) {
     unsubscribeWs()
   }
+  highlightTimeouts.forEach((timeoutId) => clearTimeout(timeoutId))
+  highlightTimeouts.clear()
 })
 </script>
 

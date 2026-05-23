@@ -62,7 +62,8 @@ const formatRelativeTime = (dateStr: string) => {
           <tr 
             v-for="device in devices" 
             :key="device.device_id"
-            class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
+            class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all group cursor-pointer"
+            :class="{ 'highlight-row': device.isHighlighted }"
             @click="$router.push(`/devices/${device.device_id}`)"
           >
             <td class="px-6 py-4">
@@ -113,12 +114,13 @@ const formatRelativeTime = (dateStr: string) => {
           <div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
           <div class="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4"></div>
         </div>
-      </div>
+      </div>Device Status Table Section
       
       <div 
         v-for="device in devices" 
         :key="device.device_id"
-        class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+        class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all cursor-pointer"
+        :class="{ 'highlight-row': device.isHighlighted }"
         @click="$router.push(`/devices/${device.device_id}`)"
       >
         <div class="flex justify-between items-start mb-3">
@@ -188,3 +190,14 @@ const formatRelativeTime = (dateStr: string) => {
     </template>
   </BaseCard>
 </template>
+
+<style scoped>
+.highlight-row {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  box-shadow: inset 4px 0 0 0 rgb(59, 130, 246) !important;
+  transition: all 0.3s ease-in-out;
+}
+:deep(.dark) .highlight-row {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+</style>

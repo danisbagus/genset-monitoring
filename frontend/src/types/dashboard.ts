@@ -15,6 +15,7 @@ export interface DeviceStatus {
   engine_running: boolean
   fuel_level: number
   last_seen_at: string
+  isHighlighted?: boolean
 }
 
 export interface Alert {
