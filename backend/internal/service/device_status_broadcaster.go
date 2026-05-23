@@ -177,5 +177,7 @@ func (dsb *DeviceStatusBroadcaster) broadcastDeviceStatus(ctx context.Context, d
 		zap.String("source", triggerSource),
 		zap.String("device_name", payload.DeviceName),
 		zap.Bool("device_online", payload.DeviceOnline),
-		zap.Bool("engine_running", payload.EngineRunning))
+		zap.Bool("engine_running", payload.EngineRunning),
+		zap.Float64("fuel_level", payload.FuelLevel),
+		zap.Float64("coolant_temperature", payload.CoolantTemperature))
 }
