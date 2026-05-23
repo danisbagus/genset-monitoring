@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/danisbagus/genset-monitoring/backend/internal/model"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -37,6 +38,7 @@ type DashboardRepository interface {
 	GetSummary(ctx context.Context) (*model.DashboardSummary, error)
 	GetDeviceStates(ctx context.Context, filter DeviceStateFilter) (*DeviceStateResult, error)
 	GetRecentAlerts(ctx context.Context, filter RecentAlertFilter) (*RecentAlertResult, error)
+	GetDeviceStateByID(ctx context.Context, deviceID uuid.UUID) (*model.DeviceState, error)
 }
 
 type dashboardRepository struct {
@@ -104,6 +106,31 @@ func (r *dashboardRepository) GetDeviceStates(ctx context.Context, filter Device
 		Devices: devices,
 		Total:   total,
 	}, nil
+}
+
+// GetDeviceStateByID returns the dashboard state of a single device.
+func (r *dashboardRepository) GetDeviceStateByID(ctx context.Context, deviceID uuid.UUID) (*model.DeviceState, error) {
+	var state model.DeviceState
+
+	query := `
+		SELECT 
+			d.id AS device_id,
+			d.name AS device_name,
+			COALESCE(dls.last_online_at >= (NOW() - INTERVAL '5 minutes'), false) AS device_online,
+			COALESCE(dls.engine_running = true AND dls.last_online_at >= (NOW() - INTERVAL '5 minutes'), false) AS engine_running,
+			COALESCE(dls.fuel_level, 0) AS fuel_level,
+			COALESCE(dls.coolant_temperature, 0) AS coolant_temperature,
+			dls.last_seen_at
+		FROM devices d
+		LEFT JOIN device_latest_state dls ON d.id = dls.device_id
+		WHERE d.deleted_at IS NULL AND d.id = ?
+	`
+
+	if err := r.db.WithContext(ctx).Raw(query, deviceID).Scan(&state).Error; err != nil {
+		return nil, fmt.Errorf("dashboardRepository.GetDeviceStateByID: %w", err)
+	}
+
+	return &state, nil
 }
 
 // GetRecentAlerts returns a paginated list of recent alerts for the dashboard.

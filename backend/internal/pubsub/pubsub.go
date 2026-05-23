@@ -16,6 +16,8 @@ const (
 	TopicHeartbeatReceived Topic = "heartbeat.received"
 	// TopicTelemetryEngineCreated triggered when a telemetry engine is created
 	TopicTelemetryEngineCreated Topic = "telemetry.engine.created"
+	// TopicTelemetryElectricalCreated triggered when a telemetry electrical is created
+	TopicTelemetryElectricalCreated Topic = "telemetry.electrical.created"
 )
 
 // Broker defines the interface for event publishing and subscribing.
