@@ -1401,6 +1401,181 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/monitoring/devices": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a paginated list of devices with realtime monitoring summary data",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Monitoring Device List",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by device name, device code, or serial number",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by engine running status: true | false",
+                        "name": "engine_running",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by device status: active | inactive | maintenance",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by online status (last_seen_at \u003e= now()-5min): true | false",
+                        "name": "online",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset (default: 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort column: updated_at | last_seen_at | telemetry_recorded_at | name",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort direction: asc | desc (default: desc)",
+                        "name": "sort_order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Monitoring device list",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceListOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/monitoring/devices/{deviceID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns full realtime monitoring detail for a device (device info, latest state, connectivity, engine \u0026 electrical telemetry)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitoring"
+                ],
+                "summary": "Monitoring Device Detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Device UUID",
+                        "name": "deviceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Monitoring device detail",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceDetailOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid UUID",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_pkg_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1482,9 +1657,6 @@ const docTemplate = `{
                 },
                 "total_devices": {
                     "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
                 },
                 "warning_alerts": {
                     "type": "integer"
@@ -1810,6 +1982,214 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.UserProfile"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringConnectivityOutput": {
+            "type": "object",
+            "properties": {
+                "can_connected": {
+                    "type": "boolean"
+                },
+                "gps_connected": {
+                    "type": "boolean"
+                },
+                "gsm_signal": {
+                    "type": "integer"
+                },
+                "last_seen": {
+                    "type": "string"
+                },
+                "rs485_connected": {
+                    "type": "boolean"
+                },
+                "sd_card_ok": {
+                    "type": "boolean"
+                },
+                "server_connected": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceDetailOutput": {
+            "type": "object",
+            "properties": {
+                "connectivity": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringConnectivityOutput"
+                },
+                "device_info": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceInfoOutput"
+                },
+                "electrical_telemetry": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.ElectricalTelemetryOutput"
+                },
+                "engine_telemetry": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.EngineTelemetryOutput"
+                },
+                "latest_state": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringLatestStateOutput"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceInfoOutput": {
+            "type": "object",
+            "properties": {
+                "device_code": {
+                    "type": "string"
+                },
+                "engine_id": {
+                    "type": "string"
+                },
+                "firmware_version": {
+                    "type": "string"
+                },
+                "gsm_number": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {},
+                "name": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceItem": {
+            "type": "object",
+            "properties": {
+                "batt_volt": {
+                    "type": "number"
+                },
+                "can_connected": {
+                    "type": "boolean"
+                },
+                "coolant_temperature": {
+                    "type": "number"
+                },
+                "device_code": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "device_name": {
+                    "type": "string"
+                },
+                "device_status": {
+                    "type": "string"
+                },
+                "engine_running": {
+                    "type": "boolean"
+                },
+                "frequency": {
+                    "type": "number"
+                },
+                "fuel_level": {
+                    "type": "number"
+                },
+                "gps_connected": {
+                    "type": "boolean"
+                },
+                "gsm_signal": {
+                    "type": "integer"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "last_seen_at": {
+                    "type": "string"
+                },
+                "oil_pressure": {
+                    "type": "number"
+                },
+                "pf_avg": {
+                    "type": "number"
+                },
+                "rs485_connected": {
+                    "type": "boolean"
+                },
+                "sd_card_ok": {
+                    "type": "boolean"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "server_connected": {
+                    "type": "boolean"
+                },
+                "speed": {
+                    "type": "integer"
+                },
+                "telemetry_recorded_at": {
+                    "type": "string"
+                },
+                "total_va": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceListOutput": {
+            "type": "object",
+            "properties": {
+                "devices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringDeviceItem"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/github_com_danisbagus_genset-monitoring_backend_internal_service.PaginationMeta"
+                }
+            }
+        },
+        "github_com_danisbagus_genset-monitoring_backend_internal_service.MonitoringLatestStateOutput": {
+            "type": "object",
+            "properties": {
+                "batt_volt": {
+                    "type": "number"
+                },
+                "coolant_temperature": {
+                    "type": "number"
+                },
+                "engine_running": {
+                    "type": "boolean"
+                },
+                "frequency": {
+                    "type": "number"
+                },
+                "fuel_level": {
+                    "type": "number"
+                },
+                "last_online_at": {
+                    "type": "string"
+                },
+                "last_seen_at": {
+                    "type": "string"
+                },
+                "oil_pressure": {
+                    "type": "number"
+                },
+                "pf_avg": {
+                    "type": "number"
+                },
+                "speed": {
+                    "type": "integer"
+                },
+                "telemetry_recorded_at": {
+                    "type": "string"
+                },
+                "total_va": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

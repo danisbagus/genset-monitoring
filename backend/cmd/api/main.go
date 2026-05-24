@@ -119,6 +119,7 @@ func main() {
 	telemetryRepo := repository.NewTelemetryRepository(db)
 	dashboardRepo := repository.NewDashboardRepository(db)
 	alertRepo := repository.NewAlertRepository(db)
+	monitoringRepo := repository.NewMonitoringRepository(db)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	healthSvc := service.NewHealthService(db, redisClient, mqttClient)
@@ -128,6 +129,7 @@ func main() {
 	telemetrySvc := service.NewTelemetryService(telemetryRepo, deviceRepo, statusRepo, wsHub, eventBroker, log)
 	dashboardSvc := service.NewDashboardService(dashboardRepo, log)
 	alertSvc := service.NewAlertService(alertRepo, deviceRepo, eventBroker, log)
+	monitoringSvc := service.NewMonitoringService(monitoringRepo, telemetryRepo, log)
 
 	// ─── WebSocket Summary Broadcaster ─────────────────────────────────────────
 	summaryBroadcaster := service.NewSummaryBroadcaster(eventBroker, dashboardSvc, wsHub, log)
@@ -149,6 +151,7 @@ func main() {
 	telemetryHandler := handler.NewTelemetryHandler(telemetrySvc, v, log)
 	dashboardHandler := handler.NewDashboardHandler(dashboardSvc, log)
 	alertHandler := handler.NewAlertHandler(alertSvc, v, log)
+	monitoringHandler := handler.NewMonitoringHandler(monitoringSvc, log)
 
 	// ─── Gin Engine ───────────────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
@@ -221,6 +224,14 @@ func main() {
 		alerts.Use(middleware.AuthRequired(jwtManager))
 		{
 			alerts.POST("", alertHandler.Create)
+		}
+
+		// Monitoring (portected - requires valid JWT)
+		monitoring := api.Group("/monitoring")
+		monitoring.Use(middleware.AuthRequired(jwtManager))
+		{
+			monitoring.GET("/devices", monitoringHandler.ListDevices)
+			monitoring.GET("/devices/:deviceID", monitoringHandler.GetDeviceDetail)
 		}
 
 		// WebSocket endpoint
