@@ -32,6 +32,36 @@ const routes: RouteRecordRaw[] = [
       title: 'Device Details',
       requiresAuth: true
     }
+  },
+
+  // ── Monitoring Module ────────────────────────────────────────────────────────
+  {
+    path: '/monitoring/devices',
+    name: 'monitoring-devices',
+    component: () => import('@/pages/monitoring/MonitoringDevicesPage.vue'),
+    meta: {
+      title: 'Device Monitoring',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/monitoring/devices/:deviceId',
+    name: 'monitoring-device-detail',
+    component: () => import('@/pages/monitoring/MonitoringDeviceDetailPage.vue'),
+    props: true,
+    meta: {
+      title: 'Device Detail',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/monitoring/alerts',
+    name: 'monitoring-alerts',
+    component: () => import('@/pages/monitoring/MonitoringAlertsPage.vue'),
+    meta: {
+      title: 'Alert Monitoring',
+      requiresAuth: true
+    }
   }
 ]
 

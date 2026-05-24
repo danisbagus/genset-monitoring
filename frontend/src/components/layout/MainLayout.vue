@@ -44,9 +44,11 @@ const handleLogout = async () => {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-  { name: 'Devices', href: '/devices/1', icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z' },
+  { name: 'Dashboard', href: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', group: null },
+  { name: 'Device Monitoring', href: '/monitoring/devices', icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z', group: 'Monitoring' },
+  { name: 'Alert Monitoring', href: '/monitoring/alerts', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', group: 'Monitoring' },
 ]
+
 </script>
 
 <template>
@@ -71,31 +73,43 @@ const navigation = [
         <span v-if="sidebarOpen || mobileMenuOpen" class="ml-3 font-semibold tracking-wider uppercase text-sm truncate">Genset Monitor</span>
       </div>
       
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-        <router-link 
-          v-for="item in navigation" 
-          :key="item.name"
-          :to="item.href"
-          class="flex items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-          active-class="bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400"
-        >
-          <svg 
-            class="w-6 h-6 shrink-0 transition-colors" 
-            :class="(sidebarOpen || mobileMenuOpen) ? 'mr-3' : 'mx-auto'"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <template v-for="(item, idx) in navigation" :key="item.name">
+          <!-- Group heading (only on first item of each group) -->
+          <div
+            v-if="item.group && (idx === 0 || navigation[idx - 1].group !== item.group)"
+            class="pt-4 pb-1 px-3"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-          </svg>
-          <span v-if="sidebarOpen || mobileMenuOpen" class="truncate font-medium">{{ item.name }}</span>
-          
-          <!-- Tooltip for collapsed state -->
-          <div v-if="!sidebarOpen && !mobileMenuOpen" class="fixed left-20 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-            {{ item.name }}
+            <span v-if="sidebarOpen || mobileMenuOpen" class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+              {{ item.group }}
+            </span>
+            <div v-else class="w-full h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
           </div>
-        </router-link>
+
+          <router-link
+            :to="item.href"
+            class="flex items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+            active-class="bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400"
+          >
+            <svg
+              class="w-5 h-5 shrink-0 transition-colors"
+              :class="(sidebarOpen || mobileMenuOpen) ? 'mr-3' : 'mx-auto'"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+            </svg>
+            <span v-if="sidebarOpen || mobileMenuOpen" class="truncate font-medium text-sm">{{ item.name }}</span>
+
+            <!-- Tooltip for collapsed state -->
+            <div v-if="!sidebarOpen && !mobileMenuOpen" class="fixed left-20 ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+              {{ item.name }}
+            </div>
+          </router-link>
+        </template>
       </nav>
+
       
       <div class="p-4 border-t border-slate-200 dark:border-slate-800 hidden lg:block">
         <button 

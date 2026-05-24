@@ -32,4 +32,8 @@ export const API_ENDPOINTS = {
     DEVICE_STATES: '/v1/dashboard/device-states',
     RECENT_ALERTS: '/v1/dashboard/recent-alerts',
   },
+  MONITORING: {
+    DEVICES: '/v1/monitoring/devices',
+    DEVICE_DETAIL: (deviceId: string) => `/v1/monitoring/devices/${deviceId}`,
+  },
 } as const
